@@ -1,0 +1,868 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0f19">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TAG2.GG">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/app-icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="assets/app-icon-192.png">
+  <title>TAG2.GG</title>
+  <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body>
+  <header class="topbar">
+    <button class="menu-toggle" id="menuToggle" aria-label="메뉴 열기">☰</button>
+    <a class="brand" href="#home" data-view="home">TAG2<span>.GG</span></a>
+    <form class="search" id="searchForm">
+      <div class="search-input-wrap">
+        <input id="playerSearch" type="search" placeholder="플레이어 닉네임 입력..." autocomplete="off"
+          aria-controls="playerSuggestions" aria-autocomplete="list">
+        <div id="playerSuggestions" class="suggestions hidden" role="listbox"></div>
+      </div>
+      <button type="submit" aria-label="플레이어 검색">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="10.8" cy="10.8" r="6.8"></circle>
+          <path d="m16 16 5 5"></path>
+        </svg>
+      </button>
+    </form>
+  </header>
+
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-title">STATISTICS</div>
+      <nav class="nav-list" aria-label="통계 메뉴">
+        <a class="nav-item active" href="#home" data-view="home"><span>⌂</span>홈</a>
+        <a class="nav-item" href="#players" data-view="players"><span>◎</span>TOP 10</a>
+        <a class="nav-item" href="#matches" data-view="matches"><span>▤</span>최근 대전 기록</a>
+      </nav>
+      <div class="sidebar-footer">RPCS3 COMMUNITY<br><strong>TEKKEN TAG 2</strong></div>
+    </aside>
+
+    <main class="content">
+      <section class="page-heading">
+        <div>
+          <p class="eyebrow">RPCS3 / TEKKEN TAG TOURNAMENT 2</p>
+          <h1 id="pageTitle"><span class="page-title-icon">⌂</span> 홈</h1>
+          <p id="pageDescription">커뮤니티 전체 대전 데이터를 한눈에 확인하세요.</p>
+        </div>
+        <span class="live-status"><i></i> LIVE DATA</span>
+      </section>
+
+      <section id="dashboard" class="view-panel">
+        <div class="activity-overview">
+          <div class="stat-grid dashboard-stat-grid">
+            <article class="stat-card"><span>전체 대전</span><strong id="dashboardMatchCount">-</strong><small>전체 기록</small></article>
+            <article class="stat-card"><span>등록 플레이어</span><strong id="dashboardPlayerCount">-</strong><small>활동 플레이어</small></article>
+          </div>
+        </div>
+        <div class="meta-grid">
+          <article class="panel character-pick-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">META</p>
+                <h2>캐릭터 픽률</h2>
+              </div><span class="panel-note">TOP 6</span>
+            </div>
+            <div id="dashboardCharacterBars" class="character-bars"></div>
+          </article>
+          <article class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">TEAM META</p>
+                <h2>고승률 태그 조합</h2>
+              </div><span class="panel-note">10전 이상 · TOP 6</span>
+            </div>
+            <div id="dashboardComboBars" class="combo-bars"></div>
+          </article>
+        </div>
+        <article class="panel rising-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">RISING STAR</p>
+              <h2>이번 주 급상승 플레이어</h2>
+            </div><span class="panel-note">최근 7일 · 최소 10전</span>
+          </div>
+          <div id="dashboardRisingPlayer" class="rising-player"></div>
+        </article>
+        <article class="panel chart-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">ACTIVITY</p>
+              <h2>월간 대전 횟수</h2>
+            </div><span class="panel-note">최근 30일</span>
+          </div>
+          <div id="dashboardWeeklyChart" class="activity-chart" aria-label="최근 30일 일별 대전 수"></div>
+        </article>
+        <div class="lower-grid">
+          <article class="panel dashboard-recent-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">RECENT</p>
+                <h2>최근 대전 기록</h2>
+              </div><a href="#matches" data-view="matches">전체 보기 →</a>
+            </div>
+            <div id="dashboardRecentMatches"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="placeholder" class="view-panel hidden">
+        <article class="panel empty-panel">
+          <div id="directoryContent">
+            <div class="empty-icon">◈</div>
+            <h2 id="placeholderTitle">상세 통계</h2>
+            <p id="placeholderMessage">Supabase 실제 데이터와 연결하면 이 영역에 차트와 목록이 표시됩니다.</p>
+          </div>
+        </article>
+      </section>
+
+      <section id="profile" class="view-panel hidden">
+        <div class="profile-hero panel">
+          <div>
+            <p class="eyebrow">PLAYER PROFILE</p>
+            <h2 id="profileName">플레이어</h2>
+            <p id="profileSummary">대전 기록을 불러오는 중입니다.</p>
+          </div>
+          <div class="profile-metrics">
+            <div class="profile-metric"><strong id="profileWinRate">-</strong><span>승률</span></div>
+            <div class="profile-metric"><strong id="profilePlayTime">-</strong><span>총 플레이 시간</span></div>
+            <div class="profile-metric"><strong id="profileLastAccess">-</strong><span>마지막 접속</span></div>
+          </div>
+        </div>
+        <div class="profile-top-grid">
+          <article class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">MOST PLAYED TEAMS</p>
+                <h2>주력 태그 조합</h2>
+              </div><span class="panel-note">TOP 3</span>
+            </div>
+            <div id="profileTeams" class="profile-teams">
+              <p class="muted">조합 통계를 계산하는 중입니다.</p>
+            </div>
+          </article>
+          <article class="panel rivalry-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">HEAD TO HEAD</p>
+                <h2>상대 전적</h2>
+              </div>
+              <form id="opponentSearchForm" class="search opponent-search">
+                <div class="search-input-wrap">
+                  <input id="opponentSearch" type="search" placeholder="상대 닉네임 입력..." autocomplete="off"
+                    aria-controls="opponentSuggestions" aria-autocomplete="list">
+                  <div id="opponentSuggestions" class="suggestions hidden" role="listbox"></div>
+                </div>
+                <button type="submit" aria-label="상대 전적 검색">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="10.8" cy="10.8" r="6.8"></circle>
+                    <path d="m16 16 5 5"></path>
+                  </svg>
+                </button>
+              </form>
+            </div>
+            <div id="rivalResult" class="rival-result muted">최근 대전 상대 5명의 전적을 표시합니다.</div>
+            <div id="recentRivals" class="rival-list"></div>
+          </article>
+        </div>
+        <div class="profile-grid">
+          <article class="panel profile-matches-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">RECENT MATCHES</p>
+                <h2>최근 대전 결과</h2>
+              </div><label class="sort-control"><span>정렬</span><select id="matchSort" class="match-sort"
+                  aria-label="대전 정렬">
+                  <option value="time">최신 순</option>
+                  <option value="wins">승리 순</option>
+                  <option value="losses">패배 순</option>
+                </select></label>
+            </div>
+            <div class="match-header" aria-hidden="true"><span>대전
+                번호</span><span>결과</span><span>스코어</span><span></span><span></span><span></span><span>대전 시간</span></div>
+            <div id="profileMatches" class="profile-matches">
+              <p class="muted">대전 기록을 불러오는 중입니다.</p>
+            </div>
+            <div id="matchPagination" class="pagination"></div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const titles = { home: ['홈', '커뮤니티 전체 대전 데이터를 한눈에 확인하세요.'], characters: ['캐릭별 승률', '캐릭터별 선택률과 승률을 비교합니다.'], players: ['TOP 10', '서버 전체 플레이어 상위 목록입니다.'], rivals: ['상대별 전적', '상대 플레이어와의 승패 기록을 분석합니다.'], teams: ['태그 조합 통계', '가장 많이 사용된 태그 조합과 승률입니다.'], matches: ['최근 대전 기록', '최근 등록된 대전 결과를 확인합니다.'] };
+    const panels = document.querySelectorAll('[data-view]');
+    function showView(view) {
+      const meta = titles[view] || titles.home;
+      document.querySelector('#placeholder .empty-panel').classList.remove('directory-panel');
+      document.getElementById('pageTitle').innerHTML = view === 'home'
+        ? '<span class="page-title-icon">⌂</span> 홈'
+        : escapeHTML(meta[0]);
+      document.getElementById('pageDescription').textContent = meta[1];
+      document.getElementById('dashboard').classList.toggle('hidden', view !== 'home');
+      document.getElementById('placeholder').classList.toggle('hidden', view === 'home');
+      document.getElementById('profile').classList.add('hidden');
+      if (view !== 'players' && view !== 'matches' && !document.getElementById('placeholderTitle')) {
+        document.getElementById('directoryContent').innerHTML = '<div class="empty-icon">◈</div><h2 id="placeholderTitle"></h2><p id="placeholderMessage"></p>';
+      }
+      const placeholderTitle = document.getElementById('placeholderTitle');
+      const placeholderMessage = document.getElementById('placeholderMessage');
+      if (placeholderTitle) placeholderTitle.textContent = meta[0];
+      if (placeholderMessage) placeholderMessage.textContent = '데이터를 불러오는 중입니다.';
+      document.querySelectorAll('.nav-item').forEach(item => item.classList.toggle('active', item.dataset.view === view));
+      document.getElementById('sidebar').classList.remove('open');
+      if (view === 'home') loadDashboard();
+      if (view === 'players' || view === 'matches') loadDirectory(view);
+    }
+    function updateMatchHeaders() {
+      document.querySelectorAll('.match-header').forEach(header => {
+        header.style.transform = '';
+        if (!header.getBoundingClientRect().width) return;
+        const topOffset = window.innerWidth <= 640 ? 67 : 72;
+        const rect = header.getBoundingClientRect();
+        const container = header.closest('.panel');
+        const containerRect = container ? container.getBoundingClientRect() : null;
+        const maxTop = containerRect ? containerRect.bottom - rect.height : topOffset;
+        const targetTop = Math.min(topOffset, maxTop);
+        if (rect.top < targetTop) header.style.transform = `translateY(${targetTop - rect.top}px)`;
+      });
+    }
+    window.addEventListener('scroll', updateMatchHeaders, { passive: true });
+    window.addEventListener('resize', updateMatchHeaders);
+    new MutationObserver(updateMatchHeaders).observe(document.body, { childList: true, subtree: true });
+    window.setTimeout(updateMatchHeaders, 0);
+    panels.forEach(item => item.addEventListener('click', event => {
+      const view = item.dataset.view;
+      if (!view) return;
+      event.preventDefault();
+      history.pushState({}, '', `#${view}`);
+      showView(view);
+    }));
+    document.getElementById('menuToggle').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('open'));
+    const SUPABASE_URL = 'https://hnmwidamrbcslnaykaem.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_D4XcdQKUZh7EMCoFNx7YWA_K0PWiKkl';
+    const CHARACTER_NAMES_KO = {
+      88: '언노운', 112: '닥터', 92: '슬림밥', 108: '방패오거', 90: '쿠니미츠', 94: '포레로우',
+      104: '피잭', 116: '타이거', 106: '알렉스', 100: '엔젤', 102: '미셀', 114: '세바스챤',
+      96: '미하루', 110: '바이올렛', 42: '로저', 58: '레이븐', 52: '브루스', 34: '스티브',
+      0: '폴', 68: '밥', 10: '니나', 46: '왕진레이', 50: '아스카', 30: '카즈야',
+      84: '준', 28: '헤이하치', 20: '진', 56: '데빌진', 6: '킹', 36: '머덕',
+      74: '레오', 12: '화랑', 18: '에디', 32: '리', 4: '레이', 24: '쿠마',
+      38: '모쿠진', 8: '요시미츠', 40: '잭', 26: '브라이언', 2: '로우', 72: '미겔',
+      44: '안나', 14: '샤오유', 64: '리리', 76: '라스', 82: '트루오거', 80: '진파치',
+      78: '알리사', 22: '제이씨', 62: '아머킹', 48: '간류', 70: '자피나', 54: '백두산',
+      16: '크리스티', 66: '드라구노프', 60: '펭', 86: '팬더'
+    };
+    const characterImage = id => `<img src="assets/characters/${id}.webp" alt="캐릭터 이미지">`;
+    const teamMarkup = (main, sub) => {
+      const ids = [main, sub].filter(id => id !== null && id !== undefined && id !== '');
+      const uniqueIds = ids.length >= 2 && ids[0] === ids[1] ? [ids[0]] : ids.slice(0, 2);
+      return `<div class="team-visual${uniqueIds.length === 1 ? ' solo' : ''}">${uniqueIds.map(id => characterImage(id)).join('')}</div>`;
+    };
+    const matchTeamMarkup = (main, sub) => {
+      const ids = [main, sub].filter(id => id !== null && id !== undefined && id !== '');
+      const uniqueIds = ids.length >= 2 && ids[0] === ids[1] ? [ids[0]] : ids.slice(0, 2);
+      const names = uniqueIds.map(id => CHARACTER_NAMES_KO[String(id)] || `ID ${id}`);
+      return `<div class="team-visual${uniqueIds.length === 1 ? ' solo' : ''}">${uniqueIds.map(id => characterImage(id)).join('')}</div><small class="match-character-names">${escapeHTML(names.join(' / '))}</small>`;
+    };
+    let playerNames = [];
+    let playerNamesRequest = null;
+    let currentProfileName = '';
+    let currentProfileMatches = [];
+    let currentMatchPage = 1;
+    let currentDirectoryPage = 1;
+    let dashboardRequest = null;
+    let dashboardMatches = null;
+    const MATCHES_PER_PAGE = 10;
+    const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
+    function dashboardMatchQuery() {
+      const fields = 'id,created_at,p1_name,p2_name,winner,start_time,end_time,p1_score,p2_score,p1_main_character_id,p1_sub_character_id,p2_main_character_id,p2_sub_character_id';
+      return `${SUPABASE_URL}/rest/v1/matches?select=${fields}&order=created_at.desc&limit=1000`;
+    }
+    async function loadDashboard() {
+      if (dashboardRequest) return dashboardRequest;
+      dashboardRequest = fetch(dashboardMatchQuery(), { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } })
+        .then(response => {
+          if (!response.ok) throw new Error(`Supabase request failed (${response.status})`);
+          return response.json();
+        })
+        .then(matches => {
+          dashboardMatches = matches;
+          renderDashboard(matches);
+          return matches;
+        })
+        .catch(error => {
+          document.getElementById('dashboardMatchCount').textContent = '-';
+          document.getElementById('dashboardPlayerCount').textContent = '-';
+          document.getElementById('dashboardCharacterBars').innerHTML = '<p class="error-message">데이터를 불러오지 못했습니다.</p>';
+          document.getElementById('dashboardComboBars').innerHTML = '<p class="error-message">데이터를 불러오지 못했습니다.</p>';
+          console.error('Dashboard data loading failed:', error);
+        })
+        .finally(() => { dashboardRequest = null; });
+      return dashboardRequest;
+    }
+    function renderDashboard(matches) {
+      const players = new Set();
+      const characters = new Map();
+      matches.forEach(match => {
+        [match.p1_name, match.p2_name].filter(Boolean).forEach(name => players.add(name.toLowerCase()));
+        ['p1_main_character_id', 'p1_sub_character_id', 'p2_main_character_id', 'p2_sub_character_id'].forEach(field => {
+          const id = match[field];
+          if (id !== null && id !== undefined && id !== '') characters.set(String(id), (characters.get(String(id)) || 0) + 1);
+        });
+      });
+      document.getElementById('dashboardMatchCount').textContent = matches.length.toLocaleString();
+      document.getElementById('dashboardPlayerCount').textContent = players.size.toLocaleString();
+      const characterEntries = [...characters.entries()].sort((a, b) => b[1] - a[1]);
+      renderDashboardWeekly(matches);
+      renderDashboardCharacters(characterEntries, characterEntries.reduce((sum, entry) => sum + entry[1], 0));
+      renderDashboardCombos(matches);
+      renderDashboardRisingPlayer(matches);
+      renderDashboardRecent(matches.slice(0, 3));
+    }
+    function renderDashboardWeekly(matches) {
+      const referenceNow = new Date();
+      const reference = new Date(Date.UTC(
+        referenceNow.getUTCFullYear(),
+        referenceNow.getUTCMonth(),
+        referenceNow.getUTCDate()
+      ));
+      const counts = Array.from({ length: 30 }, (_, index) => {
+        const date = new Date(reference);
+        date.setUTCDate(reference.getUTCDate() - (29 - index));
+        return { date, count: 0 };
+      });
+      matches.forEach(match => {
+        const value = match.end_time || match.start_time;
+        const parts = value?.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (!parts) return;
+        const day = new Date(Date.UTC(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3])));
+        const item = counts.find(entry => entry.date.getTime() === day.getTime());
+        if (item) item.count++;
+      });
+      const labels = ['일', '월', '화', '수', '목', '금', '토'];
+      const width = 760;
+      const height = 190;
+      const padding = { top: 20, right: 18, bottom: 38, left: 34 };
+      const max = Math.max(1, ...counts.map(item => item.count));
+      const plotWidth = width - padding.left - padding.right;
+      const plotHeight = height - padding.top - padding.bottom;
+      const points = counts.map((item, index) => ({
+        ...item,
+        x: padding.left + (plotWidth * index / (counts.length - 1)),
+        y: padding.top + plotHeight - (item.count / max * plotHeight)
+      }));
+      const line = points.map(point => `${point.x},${point.y}`).join(' ');
+      const area = `${padding.left},${padding.top + plotHeight} ${line} ${padding.left + plotWidth},${padding.top + plotHeight}`;
+      const grid = [0, .5, 1].map(level => {
+        const y = padding.top + plotHeight - (plotHeight * level);
+        const value = Math.round(max * level);
+        return `<line x1="${padding.left}" y1="${y}" x2="${width - padding.right}" y2="${y}" /><text x="${padding.left - 8}" y="${y + 4}" text-anchor="end">${value}</text>`;
+      }).join('');
+      const pointMarkup = points.map((point, index) => `<g class="activity-point ${point.date.getTime() === reference.getTime() ? 'current' : ''}" tabindex="0" data-date="${point.date.getUTCFullYear()}-${point.date.getUTCMonth() + 1}-${point.date.getUTCDate()}" data-count="${point.count}"><circle cx="${point.x}" cy="${point.y}" r="4"></circle><text class="day" x="${point.x}" y="${height - 20}" text-anchor="middle">${index % 5 === 0 || point.date.getTime() === reference.getTime() ? labels[point.date.getUTCDay()] : ''}</text><text class="date" x="${point.x}" y="${height - 6}" text-anchor="middle">${index % 5 === 0 || point.date.getTime() === reference.getTime() ? `${point.date.getUTCMonth() + 1}/${point.date.getUTCDate()}` : ''}</text></g>`).join('');
+      document.getElementById('dashboardWeeklyChart').innerHTML = `<svg class="activity-chart-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" role="img" aria-label="최근 30일 대전 횟수 추이"><g class="activity-grid">${grid}</g><polygon class="activity-area" points="${area}"></polygon><polyline class="activity-line" points="${line}"></polyline>${pointMarkup}</svg><div class="activity-tooltip" hidden></div>`;
+      const chart = document.getElementById('dashboardWeeklyChart');
+      const tooltip = chart.querySelector('.activity-tooltip');
+      chart.querySelectorAll('.activity-point').forEach(point => {
+        const showTooltip = () => {
+          tooltip.textContent = `${point.dataset.date} · ${point.dataset.count}전`;
+          tooltip.hidden = false;
+          const pointBox = point.getBoundingClientRect();
+          const chartBox = chart.getBoundingClientRect();
+          tooltip.style.left = `${pointBox.left - chartBox.left + pointBox.width / 2}px`;
+          tooltip.style.top = `${pointBox.top - chartBox.top - 8}px`;
+        };
+        point.addEventListener('mouseenter', showTooltip);
+        point.addEventListener('focus', showTooltip);
+        point.addEventListener('mouseleave', () => { tooltip.hidden = true; });
+        point.addEventListener('blur', () => { tooltip.hidden = true; });
+      });
+    }
+    function renderDashboardCharacters(entries, total) {
+      const top = entries.slice(0, 6);
+      const maxCount = Math.max(1, ...top.map(entry => entry[1]));
+      document.getElementById('dashboardCharacterBars').innerHTML = top.map(([id, count]) => {
+        const percentage = (count / (total || 1)) * 100;
+        return `<div class="character-bar-row"><div class="character-bar-identity">${characterImage(id)}<span>${escapeHTML(CHARACTER_NAMES_KO[id] || `ID ${id}`)}</span></div><div class="character-bar-track"><b style="width:${(count / maxCount) * 100}%"></b></div><strong>${percentage.toFixed(1)}%</strong></div>`;
+      }).join('') || '<p class="muted">캐릭터 기록이 없습니다.</p>';
+    }
+    function renderDashboardCombos(matches) {
+      const combos = new Map();
+      matches.forEach(match => {
+        [
+          {
+            ids: [match.p1_main_character_id, match.p1_sub_character_id],
+            won: match.winner?.toLowerCase() === match.p1_name?.toLowerCase()
+          },
+          {
+            ids: [match.p2_main_character_id, match.p2_sub_character_id],
+            won: match.winner?.toLowerCase() === match.p2_name?.toLowerCase()
+          }
+        ].forEach(team => {
+          if (team.ids.some(id => id === null || id === undefined || id === '')) return;
+          const key = team.ids.map(String).join('/');
+          const item = combos.get(key) || { ids: team.ids, games: 0, wins: 0 };
+          item.games++;
+          if (team.won) item.wins++;
+          combos.set(key, item);
+        });
+      });
+      const top = [...combos.values()]
+        .filter(item => item.games >= 10)
+        .sort((a, b) => (b.wins / b.games) - (a.wins / a.games) || b.games - a.games)
+        .slice(0, 6);
+      const maxRate = Math.max(1, ...top.map(item => (item.wins / item.games) * 100));
+      document.getElementById('dashboardComboBars').innerHTML = top.map(item => {
+        const rate = (item.wins / item.games) * 100;
+        const names = item.ids.map(id => CHARACTER_NAMES_KO[String(id)] || `ID ${id}`).join(' / ');
+        return `<div class="combo-bar-row"><div class="combo-bar-identity">${teamMarkup(...item.ids)}<span>${escapeHTML(names)}</span></div><div class="character-bar-track"><b style="width:${(rate / maxRate) * 100}%"></b></div><strong>${rate.toFixed(1)}%</strong></div>`;
+      }).join('') || '<p class="muted">태그 조합 기록이 없습니다.</p>';
+    }
+    function renderDashboardRisingPlayer(matches) {
+      const now = new Date();
+      const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+      const recentStart = new Date(today);
+      recentStart.setUTCDate(today.getUTCDate() - 6);
+      const previousStart = new Date(today);
+      previousStart.setUTCDate(today.getUTCDate() - 13);
+      const previousEnd = new Date(today);
+      previousEnd.setUTCDate(today.getUTCDate() - 7);
+      const periods = new Map();
+      const getDay = match => {
+        const value = match.end_time || match.start_time;
+        const parts = value?.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        return parts ? new Date(Date.UTC(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3]))) : null;
+      };
+      matches.forEach(match => {
+        const day = getDay(match);
+        if (!day || day < previousStart || day > today) return;
+        const period = day >= recentStart ? 'recent' : 'previous';
+        const winner = match.winner?.toLowerCase();
+        [match.p1_name, match.p2_name].filter(Boolean).forEach(name => {
+          const key = name.toLowerCase();
+          const item = periods.get(key) || { name, previous: { games: 0, wins: 0 }, recent: { games: 0, wins: 0 } };
+          item[period].games++;
+          if (winner === key) item[period].wins++;
+          periods.set(key, item);
+        });
+      });
+      const candidates = [...periods.values()]
+        .filter(item => item.previous.games >= 10 && item.recent.games >= 10)
+        .map(item => ({
+          ...item,
+          previousRate: item.previous.wins / item.previous.games * 100,
+          recentRate: item.recent.wins / item.recent.games * 100
+        }))
+        .sort((a, b) => (b.recentRate - b.previousRate) - (a.recentRate - a.previousRate) || b.recent.games - a.recent.games);
+      const player = candidates[0];
+      const target = document.getElementById('dashboardRisingPlayer');
+      if (!player || player.recentRate <= player.previousRate) {
+        target.innerHTML = '<p class="muted">최근 7일과 직전 7일을 각각 10전 이상 기록한 상승 플레이어가 아직 없습니다.</p>';
+        return;
+      }
+      const increase = player.recentRate - player.previousRate;
+      target.innerHTML = `<div class="rising-summary"><span class="rising-crown" aria-hidden="true">★</span><div><a class="profile-link rising-name" href="#profile/${encodeURIComponent(player.name)}" data-profile-name="${encodeURIComponent(player.name)}">${escapeHTML(player.name)}</a><p><span>직전 7일 ${player.previous.games}전 ${player.previous.wins}승 ${player.previous.games - player.previous.wins}패 →</span><span>최근 7일 ${player.recent.games}전 ${player.recent.wins}승 ${player.recent.games - player.recent.wins}패</span></p></div><strong class="rising-delta">+${increase.toFixed(1)}<small>%p</small></strong></div><div class="rising-chart" role="img" aria-label="${escapeHTML(player.name)}의 기간별 승률 비교"><div class="rising-bar-row"><span>직전 7일</span><div><b style="width:${player.previousRate}%"></b></div><strong>${player.previousRate.toFixed(1)}%</strong></div><div class="rising-bar-row current"><span>최근 7일</span><div><b style="width:${player.recentRate}%"></b></div><strong>${player.recentRate.toFixed(1)}%</strong></div></div>`;
+    }
+    function renderDashboardRanking(matches) {
+      const stats = new Map();
+      matches.forEach(match => {
+        const winner = match.winner?.toLowerCase();
+        [match.p1_name, match.p2_name].filter(Boolean).forEach(name => {
+          const key = name.toLowerCase();
+          const item = stats.get(key) || { name, games: 0, wins: 0 };
+          item.games++;
+          if (winner === key) item.wins++;
+          stats.set(key, item);
+        });
+      });
+      const ranking = [...stats.values()].filter(item => item.games > 0).sort((a, b) => b.wins / b.games - a.wins / a.games || b.games - a.games).slice(0, 3);
+      document.getElementById('dashboardRanking').innerHTML = ranking.map((item, index) =>
+        `<div><em>${String(index + 1).padStart(2, '0')}</em><strong>${escapeHTML(item.name)}</strong><span>${item.games}전</span><b>${((item.wins / item.games) * 100).toFixed(1)}%</b></div>`
+      ).join('') || '<p class="muted">플레이어 기록이 없습니다.</p>';
+    }
+    function renderDashboardRecent(matches) {
+      document.getElementById('dashboardRecentMatches').innerHTML = matches.map((match, index) => renderMatchMarkup(match, index + 1)).join('') || '<p class="muted">대전 기록이 없습니다.</p>';
+    }
+    async function loadDirectory(view) {
+      try {
+        const matches = dashboardMatches || await loadDashboard();
+        document.querySelector('#placeholder .empty-panel').classList.add('directory-panel');
+        if (view === 'players') renderPlayersDirectory(matches || []);
+        if (view === 'matches') {
+          currentDirectoryPage = 1;
+          renderMatchesDirectory(matches || []);
+        }
+      } catch (error) {
+        document.getElementById('placeholderMessage').textContent = '데이터를 불러오지 못했습니다.';
+        console.error('Directory data loading failed:', error);
+      }
+    }
+    function renderPlayersDirectory(matches) {
+      const stats = new Map();
+      matches.forEach(match => {
+        const winner = match.winner?.toLowerCase();
+        [
+          {
+            name: match.p1_name,
+            ids: [match.p1_main_character_id, match.p1_sub_character_id]
+          },
+          {
+            name: match.p2_name,
+            ids: [match.p2_main_character_id, match.p2_sub_character_id]
+          }
+        ].filter(player => player.name).forEach(player => {
+          const name = player.name;
+          const key = name.toLowerCase();
+          const item = stats.get(key) || { name, games: 0, wins: 0, teams: new Map() };
+          item.games++;
+          if (winner === key) item.wins++;
+          if (player.ids.every(id => id !== null && id !== undefined && id !== '')) {
+            const teamKey = player.ids.map(String).join('/');
+            const team = item.teams.get(teamKey) || { ids: player.ids, games: 0 };
+            team.games++;
+            item.teams.set(teamKey, team);
+          }
+          stats.set(key, item);
+        });
+      });
+      const ranking = [...stats.values()]
+        .filter(item => item.games >= 20)
+        .sort((a, b) => b.wins / b.games - a.wins / a.games || b.games - a.games);
+      document.getElementById('directoryContent').innerHTML = `<div class="ranking-warning"><span class="ranking-warning-icon" aria-hidden="true">◎</span><div><strong>실전 기록을 바탕으로 한 플레이어 랭킹</strong><p>현재 순위는 계급이 아닌 승률을 기준으로 산정됩니다. 객관적인 비교를 위해 총 20전 이상 기록된 플레이어만 집계하며, 승률이 같을 경우 더 많은 경기 수를 기록한 플레이어가 우선됩니다.</p></div></div><div class="panel-heading"><div><p class="eyebrow">RANKING</p><h2>TOP 10</h2></div><span class="panel-note">20전 이상 · 승률순</span></div><div class="ranking">${ranking.slice(0, 10).map((item, index) => { const team = [...item.teams.values()].sort((a, b) => b.games - a.games)[0]; const losses = item.games - item.wins; return `<div><em>${String(index + 1).padStart(2, '0')}</em><a class="profile-link" href="#profile/${encodeURIComponent(item.name)}" data-profile-name="${encodeURIComponent(item.name)}">${escapeHTML(item.name)}</a><span class="ranking-team">${team ? `${teamMarkup(...team.ids)}<small>${team.ids.map(id => CHARACTER_NAMES_KO[String(id)] || `ID ${id}`).join(' / ')}</small>` : '<small>태그 정보 없음</small>'}</span><span class="ranking-record">${item.games}전 ${item.wins}승 ${losses}패</span><b>${((item.wins / item.games) * 100).toFixed(1)}%</b></div>`; }).join('') || '<p class="muted">20전 이상 기록된 플레이어가 없습니다.</p>'}</div>`;
+    }
+    function renderMatchesDirectory(matches) {
+      const pageCount = Math.ceil(matches.length / MATCHES_PER_PAGE);
+      currentDirectoryPage = Math.min(Math.max(currentDirectoryPage, 1), Math.max(pageCount, 1));
+      const pageMatches = matches.slice((currentDirectoryPage - 1) * MATCHES_PER_PAGE, currentDirectoryPage * MATCHES_PER_PAGE);
+      const chronologicalMatches = [...matches].sort((a, b) => Date.parse(a.created_at || 0) - Date.parse(b.created_at || 0));
+      const matchNumbers = new Map(chronologicalMatches.map((match, index) => [match.id, index + 1]));
+      document.getElementById('directoryContent').innerHTML = `<div class="panel-heading"><div><p class="eyebrow">RECENT MATCHES</p><h2>최근 대전 기록</h2></div></div><div class="match-header directory-match-header" aria-hidden="true"><span>대전 번호</span><span>결과</span><span>스코어</span><span></span><span></span><span></span><span>대전 시간</span></div><div class="directory-matches">${pageMatches.map(match => renderMatchMarkup(match, matchNumbers.get(match.id) || '-')).join('') || '<p class="muted">대전 기록이 없습니다.</p>'}</div><div id="directoryPagination" class="pagination">${renderPagination(pageCount, currentDirectoryPage, 'directory-page')}</div>`;
+    }
+    function renderPagination(pageCount, currentPage, pageAttribute) {
+      if (pageCount <= 1) return '';
+      const pages = new Set([1, 2, 3, pageCount - 2, pageCount - 1, pageCount]);
+      for (let page = currentPage - 1; page <= currentPage + 1; page++) {
+        if (page > 0 && page <= pageCount) pages.add(page);
+      }
+      const orderedPages = [...pages].sort((a, b) => a - b);
+      const items = [];
+      orderedPages.forEach((page, index) => {
+        if (index > 0 && page - orderedPages[index - 1] > 1) items.push('<span class="pagination-ellipsis" aria-hidden="true">...</span>');
+        items.push(`<button class="${page === currentPage ? 'active' : ''}" data-${pageAttribute}="${page}" aria-label="${page}페이지">${page}</button>`);
+      });
+      return items.join('');
+    }
+    function renderMatchMarkup(match, matchNumber) {
+      const player = match.p1_name || '-';
+      const opponent = match.p2_name || '-';
+      const won = match.winner?.toLowerCase() === player.toLowerCase();
+      const durationSeconds = (Date.parse(match.end_time) - Date.parse(match.start_time)) / 1000;
+      const duration = Number.isFinite(durationSeconds) && durationSeconds >= 0 ? formatDuration(durationSeconds) : '시간 없음';
+      return `<div class="profile-match"><span class="match-number">#${matchNumber}</span><strong class="${won ? 'win' : 'loss'}">${won ? 'WIN' : 'LOSS'}</strong><strong class="match-score">${escapeHTML(match.p1_score ?? '-')} : ${escapeHTML(match.p2_score ?? '-')}</strong><div class="match-player"><a class="profile-link" href="#profile/${encodeURIComponent(player)}" data-profile-name="${encodeURIComponent(player)}">${escapeHTML(player)}</a>${matchTeamMarkup(match.p1_main_character_id, match.p1_sub_character_id)}</div><span class="versus">vs</span><div class="match-opponent"><a class="profile-link" href="#profile/${encodeURIComponent(opponent)}" data-profile-name="${encodeURIComponent(opponent)}">${escapeHTML(opponent)}</a>${matchTeamMarkup(match.p2_main_character_id, match.p2_sub_character_id)}</div><time><strong>${duration}</strong><span>시작 ${formatMatchTime(match.start_time)}</span><span>종료 ${formatMatchTime(match.end_time)}</span></time></div>`;
+    }
+    async function loadProfile(name) {
+      const profile = document.getElementById('profile');
+      profile.classList.remove('hidden');
+      document.getElementById('dashboard').classList.add('hidden');
+      document.getElementById('placeholder').classList.add('hidden');
+      document.getElementById('pageTitle').textContent = '플레이어 프로필';
+      document.getElementById('pageDescription').textContent = '';
+      document.getElementById('profileName').textContent = name;
+      document.getElementById('profileSummary').textContent = '대전 기록을 불러오는 중입니다.';
+      document.getElementById('profileMatches').innerHTML = '<p class="muted">대전 기록을 불러오는 중입니다.</p>';
+      document.getElementById('profileTeams').innerHTML = '<p class="muted">조합 통계를 계산하는 중입니다.</p>';
+      document.getElementById('matchPagination').innerHTML = '';
+      currentProfileName = name;
+      currentProfileMatches = [];
+      currentMatchPage = 1;
+      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+      try {
+        const encodedName = encodeURIComponent(name);
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/matches?or=(p1_name.ilike.*${encodedName}*,p2_name.ilike.*${encodedName}*)&order=end_time.desc`, { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } });
+        if (!response.ok) throw new Error(`Supabase request failed (${response.status})`);
+        const matches = await response.json();
+        renderProfile(name, matches);
+      } catch (error) {
+        document.getElementById('profileSummary').textContent = '전적을 불러오지 못했습니다.';
+        document.getElementById('profileMatches').innerHTML = `<p class="error-message">${error.message}</p>`;
+        document.getElementById('profileTeams').innerHTML = '<p class="muted">데이터를 확인한 뒤 다시 시도해주세요.</p>';
+      }
+    }
+    function renderProfile(name, matches) {
+      const playerMatches = matches.filter(match => match.p1_name?.toLowerCase() === name.toLowerCase() || match.p2_name?.toLowerCase() === name.toLowerCase());
+      currentProfileName = name;
+      currentProfileMatches = playerMatches;
+      currentMatchPage = 1;
+      const wins = playerMatches.filter(match => match.winner?.toLowerCase() === name.toLowerCase()).length;
+      document.getElementById('profileWinRate').textContent = playerMatches.length ? `${((wins / playerMatches.length) * 100).toFixed(1)}%` : '-';
+      document.getElementById('profileSummary').textContent = `${playerMatches.length}전 ${wins}승 ${playerMatches.length - wins}패`;
+      const totalSeconds = playerMatches.reduce((total, match) => {
+        const start = Date.parse(match.start_time);
+        const end = Date.parse(match.end_time);
+        return total + (Number.isFinite(start) && Number.isFinite(end) && end >= start ? (end - start) / 1000 : 0);
+      }, 0);
+      const latestEnd = playerMatches.reduce((latest, match) => {
+        const end = Date.parse(match.end_time);
+        return Number.isFinite(end) && end > latest ? end : latest;
+      }, 0);
+      document.getElementById('profilePlayTime').textContent = formatDuration(totalSeconds);
+      const latestMatch = playerMatches.find(match => Date.parse(match.end_time) === latestEnd);
+      document.getElementById('profileLastAccess').textContent = latestMatch ? formatMatchTime(latestMatch.end_time) : '-';
+      renderMatchPage();
+      renderTeams(playerMatches, name);
+      renderRecentRivals(playerMatches, name);
+      document.getElementById('opponentSearch').value = '';
+    }
+    function formatDuration(seconds) {
+      const totalSeconds = Math.max(0, Math.floor(seconds));
+      const totalMinutes = Math.floor(totalSeconds / 60);
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      const remainingSeconds = totalSeconds % 60;
+      if (hours) return `${hours}시간 ${minutes}분${remainingSeconds ? ` ${remainingSeconds}초` : ''}`;
+      if (minutes) return `${minutes}분${remainingSeconds ? ` ${remainingSeconds}초` : ''}`;
+      return `${remainingSeconds}초`;
+    }
+    async function loadPlayerNames() {
+      if (playerNames.length) return playerNames;
+      if (!playerNamesRequest) {
+        playerNamesRequest = fetch(`${SUPABASE_URL}/rest/v1/matches?select=p1_name,p2_name&limit=1000`, { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } })
+          .then(response => {
+            if (!response.ok) throw new Error(`Supabase request failed (${response.status})`);
+            return response.json();
+          })
+          .then(matches => {
+            playerNames = [...new Set(matches.flatMap(match => [match.p1_name, match.p2_name]).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+            return playerNames;
+          })
+          .finally(() => { playerNamesRequest = null; });
+      }
+      return playerNamesRequest;
+    }
+    function renderSuggestions(query, inputId, suggestionsId, onSelect) {
+      const suggestions = document.getElementById(suggestionsId);
+      suggestions.replaceChildren();
+      if (!query) {
+        suggestions.classList.add('hidden');
+        return;
+      }
+      const matches = playerNames.filter(name => name.toLowerCase().startsWith(query.toLowerCase())).slice(0, 8);
+      matches.forEach(name => {
+        const option = document.createElement('button');
+        option.type = 'button';
+        option.className = 'suggestion-item';
+        option.setAttribute('role', 'option');
+        option.textContent = name;
+        option.addEventListener('mousedown', event => {
+          event.preventDefault();
+          document.getElementById(inputId).value = name;
+          suggestions.classList.add('hidden');
+          onSelect(name);
+        });
+        suggestions.appendChild(option);
+      });
+      suggestions.classList.toggle('hidden', matches.length === 0);
+    }
+    function renderPlayerSuggestions(query) {
+      renderSuggestions(query, 'playerSearch', 'playerSuggestions', name => {
+        history.pushState({}, '', `#profile/${encodeURIComponent(name)}`);
+        loadProfile(name);
+      });
+    }
+    function renderOpponentSuggestions(query) {
+      renderSuggestions(query, 'opponentSearch', 'opponentSuggestions', () => {
+        document.getElementById('opponentSearchForm').requestSubmit();
+      });
+    }
+    function renderMatchPage() {
+      const name = currentProfileName;
+      const sort = document.getElementById('matchSort').value;
+      const chronologicalMatches = [...currentProfileMatches].sort((a, b) => Date.parse(a.created_at || 0) - Date.parse(b.created_at || 0));
+      const matchNumbers = new Map(chronologicalMatches.map((match, index) => [match.id, index + 1]));
+      const sortedMatches = [...currentProfileMatches].sort((a, b) => {
+        const aIsWin = a.winner?.toLowerCase() === name.toLowerCase();
+        const bIsWin = b.winner?.toLowerCase() === name.toLowerCase();
+        if (sort === 'wins' && aIsWin !== bIsWin) return aIsWin ? -1 : 1;
+        if (sort === 'losses' && aIsWin !== bIsWin) return aIsWin ? 1 : -1;
+        return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+      });
+      const pageCount = Math.ceil(sortedMatches.length / MATCHES_PER_PAGE);
+      currentMatchPage = Math.min(Math.max(currentMatchPage, 1), Math.max(pageCount, 1));
+      const pageMatches = sortedMatches.slice((currentMatchPage - 1) * MATCHES_PER_PAGE, currentMatchPage * MATCHES_PER_PAGE);
+      document.getElementById('profileMatches').innerHTML = pageMatches.map(match => {
+        const isP1 = match.p1_name?.toLowerCase() === name.toLowerCase();
+        const opponent = isP1 ? match.p2_name : match.p1_name;
+        const playerScore = isP1 ? match.p1_score : match.p2_score;
+        const opponentScore = isP1 ? match.p2_score : match.p1_score;
+        const won = match.winner?.toLowerCase() === name.toLowerCase();
+        const startTime = formatMatchTime(match.start_time);
+        const endTime = formatMatchTime(match.end_time);
+        const durationSeconds = (Date.parse(match.end_time) - Date.parse(match.start_time)) / 1000;
+        const duration = Number.isFinite(durationSeconds) && durationSeconds >= 0 ? formatDuration(durationSeconds) : '시간 없음';
+        const matchNumber = matchNumbers.get(match.id) || '-';
+        const playerTeam = isP1 ? [match.p1_main_character_id, match.p1_sub_character_id] : [match.p2_main_character_id, match.p2_sub_character_id];
+        const opponentTeam = isP1 ? [match.p2_main_character_id, match.p2_sub_character_id] : [match.p1_main_character_id, match.p1_sub_character_id];
+        return `<div class="profile-match"><span class="match-number">#${matchNumber}</span><strong class="${won ? 'win' : 'loss'}">${won ? 'WIN' : 'LOSS'}</strong><strong class="match-score">${playerScore} : ${opponentScore}</strong><div class="match-player"><a class="profile-link" href="#profile/${encodeURIComponent(name)}" data-profile-name="${encodeURIComponent(name)}">${name}</a>${teamMarkup(...playerTeam)}</div><span class="versus">vs</span><div class="match-opponent">${teamMarkup(...opponentTeam)}<a class="profile-link" href="#profile/${encodeURIComponent(opponent)}" data-profile-name="${encodeURIComponent(opponent)}">${opponent}</a></div><time><strong>${duration}</strong><span>시작 ${startTime}</span><span>종료 ${endTime}</span></time></div>`;
+      }).join('') || '<p class="muted">해당 플레이어의 기록이 없습니다.</p>';
+      document.getElementById('matchPagination').innerHTML = renderPagination(pageCount, currentMatchPage, 'match-page');
+    }
+    function formatMatchTime(value) {
+      if (!value) return '시간 없음';
+      const parts = value.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+      if (!parts) return '시간 없음';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return '시간 없음';
+      return date.toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short', timeZone: 'Asia/Seoul' });
+    }
+    function renderTeams(playerMatches, name) {
+      const teams = new Map();
+      playerMatches.forEach(match => {
+        const isP1 = match.p1_name?.toLowerCase() === name.toLowerCase();
+        const ids = isP1 ? [match.p1_main_character_id, match.p1_sub_character_id] : [match.p2_main_character_id, match.p2_sub_character_id];
+        const key = ids.join('/');
+        const item = teams.get(key) || { ids, games: 0, wins: 0 };
+        item.games += 1;
+        if (match.winner?.toLowerCase() === name.toLowerCase()) item.wins += 1;
+        teams.set(key, item);
+      });
+      document.getElementById('profileTeams').innerHTML = [...teams.values()].sort((a, b) => b.games - a.games).slice(0, 3).map(team => {
+        const rate = (team.wins / team.games) * 100;
+        return `<div class="profile-team">${teamMarkup(...team.ids)}<div class="profile-team-stats"><div class="team-winrate" style="--rate:${rate.toFixed(1)}"><strong>${rate.toFixed(1)}%</strong></div><div><b>${team.games}전 ${team.wins}승 ${team.games - team.wins}패</b></div></div></div>`;
+      }).join('') || '<p class="muted">조합 기록이 없습니다.</p>';
+    }
+    function getRivalStats(matches, name, opponent) {
+      const relevant = matches.filter(match => {
+        const isP1 = match.p1_name?.toLowerCase() === name.toLowerCase();
+        const otherName = isP1 ? match.p2_name : match.p1_name;
+        return otherName?.toLowerCase() === opponent.toLowerCase();
+      });
+      const wins = relevant.filter(match => match.winner?.toLowerCase() === name.toLowerCase()).length;
+      return { opponent, games: relevant.length, wins, losses: relevant.length - wins, rate: relevant.length ? (wins / relevant.length) * 100 : 0, latest: Math.max(...relevant.map(match => Date.parse(match.end_time || 0)), 0) };
+    }
+    function renderRecentRivals(matches, name) {
+      const opponentOrder = [];
+      matches.slice().sort((a, b) => Date.parse(b.end_time || 0) - Date.parse(a.end_time || 0)).forEach(match => {
+        const isP1 = match.p1_name?.toLowerCase() === name.toLowerCase();
+        const opponent = isP1 ? match.p2_name : match.p1_name;
+        if (opponent && !opponentOrder.some(item => item.toLowerCase() === opponent.toLowerCase())) opponentOrder.push(opponent);
+      });
+      const rivals = opponentOrder.slice(0, 5).map(opponent => getRivalStats(matches, name, opponent));
+      document.getElementById('recentRivals').innerHTML = rivals.map(rival => rivalMarkup(rival)).join('') || '<p class="muted">상대 전적이 없습니다.</p>';
+    }
+    function rivalMarkup(rival) {
+      return `<div class="rival-row"><a class="profile-link" href="#profile/${encodeURIComponent(rival.opponent)}" data-profile-name="${encodeURIComponent(rival.opponent)}">${rival.opponent}</a><span>${rival.games}전 ${rival.wins}승 ${rival.losses}패</span><strong>${rival.rate.toFixed(1)}%</strong></div>`;
+    }
+    document.getElementById('opponentSearchForm').addEventListener('submit', event => {
+      event.preventDefault();
+      const opponent = document.getElementById('opponentSearch').value.trim();
+      const name = currentProfileName;
+      if (!opponent) return;
+      const rival = getRivalStats(currentProfileMatches, name, opponent);
+      document.getElementById('rivalResult').textContent = rival.games ? `${name} vs ${rival.opponent}` : `${opponent}와의 대전 기록이 없습니다.`;
+      document.getElementById('recentRivals').innerHTML = rival.games ? rivalMarkup(rival) : '';
+    });
+    document.getElementById('matchSort').addEventListener('change', () => { currentMatchPage = 1; renderMatchPage(); });
+    document.getElementById('profileMatches').addEventListener('click', event => {
+      const link = event.target.closest('[data-profile-name]');
+      if (!link) return;
+      event.preventDefault();
+      const name = decodeURIComponent(link.dataset.profileName);
+      history.pushState({}, '', `#profile/${encodeURIComponent(name)}`);
+      loadProfile(name);
+    });
+    document.getElementById('dashboardRecentMatches').addEventListener('click', event => {
+      const link = event.target.closest('[data-profile-name]');
+      if (!link) return;
+      event.preventDefault();
+      const name = decodeURIComponent(link.dataset.profileName);
+      history.pushState({}, '', `#profile/${encodeURIComponent(name)}`);
+      loadProfile(name);
+    });
+    document.getElementById('recentRivals').addEventListener('click', event => {
+      const link = event.target.closest('[data-profile-name]');
+      if (!link) return;
+      event.preventDefault();
+      const name = decodeURIComponent(link.dataset.profileName);
+      history.pushState({}, '', `#profile/${encodeURIComponent(name)}`);
+      loadProfile(name);
+    });
+    document.getElementById('directoryContent').addEventListener('click', event => {
+      const pageButton = event.target.closest('[data-directory-page]');
+      if (pageButton) {
+        currentDirectoryPage = Number(pageButton.dataset.directoryPage);
+        renderMatchesDirectory(dashboardMatches || []);
+        return;
+      }
+      const link = event.target.closest('[data-profile-name]');
+      if (!link) return;
+      event.preventDefault();
+      const name = decodeURIComponent(link.dataset.profileName);
+      history.pushState({}, '', `#profile/${encodeURIComponent(name)}`);
+      loadProfile(name);
+    });
+    document.getElementById('matchPagination').addEventListener('click', event => {
+      const button = event.target.closest('[data-match-page]');
+      if (!button) return;
+      currentMatchPage = Number(button.dataset.matchPage);
+      renderMatchPage();
+    });
+    document.getElementById('playerSearch').addEventListener('input', async event => {
+      const query = event.target.value.trim();
+      if (!query) {
+        renderPlayerSuggestions('');
+        return;
+      }
+      try {
+        await loadPlayerNames();
+        renderPlayerSuggestions(query);
+      } catch (error) {
+        document.getElementById('playerSuggestions').classList.add('hidden');
+        console.error('Player autocomplete failed:', error);
+      }
+    });
+    document.getElementById('opponentSearch').addEventListener('input', async event => {
+      const query = event.target.value.trim();
+      if (!query) {
+        renderOpponentSuggestions('');
+        return;
+      }
+      try {
+        await loadPlayerNames();
+        renderOpponentSuggestions(query);
+      } catch (error) {
+        document.getElementById('opponentSuggestions').classList.add('hidden');
+        console.error('Opponent autocomplete failed:', error);
+      }
+    });
+    document.addEventListener('click', event => {
+      const sidebar = document.getElementById('sidebar');
+      if (sidebar.classList.contains('open') &&
+        !event.target.closest('#sidebar') &&
+        !event.target.closest('#menuToggle')) {
+        sidebar.classList.remove('open');
+      }
+      if (!event.target.closest('.search')) {
+        document.getElementById('playerSuggestions').classList.add('hidden');
+        document.getElementById('opponentSuggestions').classList.add('hidden');
+      }
+    });
+    document.getElementById('searchForm').addEventListener('submit', event => { event.preventDefault(); const name = document.getElementById('playerSearch').value.trim(); if (name) { history.pushState({}, '', `#profile/${encodeURIComponent(name)}`); loadProfile(name); } });
+    window.addEventListener('popstate', () => showView(location.hash.slice(1) || 'home'));
+    if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+      navigator.serviceWorker.register('./sw.js').catch(error => console.error('Service worker registration failed:', error));
+    }
+    const initialHash = location.hash.slice(1);
+    if (initialHash.startsWith('profile/')) loadProfile(decodeURIComponent(initialHash.slice(8))); else showView(initialHash || 'home');
+  </script>
+</body>
+
+</html>

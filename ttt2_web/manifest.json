@@ -1,0 +1,27 @@
+{
+  "name": "TAG2.GG",
+  "short_name": "TAG2.GG",
+  "description": "Tekken Tag Tournament 2 대전 기록과 플레이어 통계",
+  "id": "./index.html",
+  "start_url": "./index.html#home",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "prefer_related_applications": false,
+  "background_color": "#090d14",
+  "theme_color": "#090d14",
+  "icons": [
+    {
+      "src": "assets/app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

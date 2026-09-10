@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TAG2.GG 모바일 앱 설치 가이드</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --surface: #ffffff;
+      --ink: #172235;
+      --muted: #5e6b7d;
+      --line: #dce4ef;
+      --blue: #237fc2;
+      --blue-dark: #14527f;
+      --pink: #e83e68;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: "Malgun Gothic", "Apple SD Gothic Neo", Arial, sans-serif;
+      line-height: 1.65;
+    }
+
+    .page {
+      width: min(100% - 32px, 1040px);
+      margin: 0 auto;
+      padding: 48px 0 72px;
+    }
+
+    .hero {
+      padding: 42px;
+      color: #fff;
+      border-radius: 22px;
+      background: linear-gradient(135deg, #121a2a, #263e5e);
+      box-shadow: 0 18px 45px rgba(28, 51, 79, .18);
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: #9ac9ef;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .14em;
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 12px; font-size: clamp(30px, 5vw, 48px); line-height: 1.2; }
+    .hero p { max-width: 720px; margin-bottom: 0; color: #dce9f7; font-size: 17px; }
+
+    .notice {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 14px;
+      align-items: start;
+      margin: 28px 0;
+      padding: 20px 22px;
+      border: 1px solid #b9d8ef;
+      border-radius: 14px;
+      background: #eef8ff;
+    }
+
+    .notice-icon {
+      color: var(--blue);
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .notice p { margin-bottom: 0; color: #31536e; }
+    .url {
+      display: inline-block;
+      margin-top: 5px;
+      color: var(--blue-dark);
+      font-weight: 800;
+      word-break: break-all;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+      margin-top: 28px;
+    }
+
+    .step {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--surface);
+      box-shadow: 0 8px 24px rgba(30, 53, 80, .07);
+    }
+
+    .step-copy { padding: 22px 24px 18px; }
+
+    .step-number {
+      display: inline-grid;
+      width: 34px;
+      height: 34px;
+      margin-bottom: 12px;
+      place-items: center;
+      border-radius: 50%;
+      color: #fff;
+      background: var(--blue);
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    h2 { margin-bottom: 8px; font-size: 26px; }
+    h3 { margin-bottom: 6px; font-size: 21px; }
+    .step-copy p { margin-bottom: 0; color: var(--muted); }
+
+    .step img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-top: 1px solid var(--line);
+      background: #111;
+    }
+
+    .tip {
+      margin-top: 30px;
+      padding: 26px 28px;
+      border-radius: 16px;
+      background: #fff7f9;
+      border: 1px solid #f2c5d0;
+    }
+
+    .tip h2 { color: #b72e50; }
+    .tip ul { margin: 0; padding-left: 22px; color: #68404b; }
+
+    footer {
+      margin-top: 34px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    @media (max-width: 700px) {
+      .page { width: min(100% - 20px, 560px); padding-top: 20px; }
+      .hero { padding: 28px 24px; border-radius: 16px; }
+      .hero p { font-size: 15px; }
+      .steps { grid-template-columns: 1fr; gap: 16px; }
+      .step-copy { padding: 18px 20px 15px; }
+    }
+
+    @media print {
+      body { background: #fff; }
+      .page { width: 100%; padding: 0; }
+      .hero { color: #fff; box-shadow: none; }
+      .step { break-inside: avoid; box-shadow: none; }
+      .steps { gap: 14px; }
+      .notice, .tip { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <p class="eyebrow">TAG2.GG MOBILE GUIDE</p>
+      <h1>TAG2.GG를 휴대폰 앱처럼 설치하는 방법</h1>
+      <p>Android 휴대폰에서 TAG2.GG 통계 사이트를 홈 화면에 추가하면, 다음부터는 앱 아이콘을 눌러 더 빠르게 접속할 수 있습니다.</p>
+    </header>
+
+    <section class="notice">
+      <div class="notice-icon">ⓘ</div>
+      <div>
+        <strong>설치 전 확인</strong>
+        <p>단톡방에 공유된 TAG2.GG 링크를 준비해 주세요. 이 안내서는 Android 휴대폰과 Chrome 기준입니다.</p>
+        <span class="url">https://tag2gg.netlify.app/</span>
+      </div>
+    </section>
+
+    <section>
+      <h2>설치 순서</h2>
+      <div class="steps">
+        <article class="step">
+          <div class="step-copy">
+            <span class="step-number">1</span>
+            <h3>링크를 다른 브라우저로 열기</h3>
+            <p>단톡방의 TAG2.GG 링크를 누른 뒤, 화면 아래 또는 메뉴의 점 3개를 누르고 <strong>다른 브라우저로 열기</strong>를 선택합니다.</p>
+          </div>
+          <img src="img/1.png" alt="공유 메뉴에서 다른 브라우저로 열기를 선택하는 화면">
+        </article>
+
+        <article class="step">
+          <div class="step-copy">
+            <span class="step-number">2</span>
+            <h3>Chrome 선택</h3>
+            <p>연결 프로그램 목록에서 <strong>Chrome</strong>을 선택하고 <strong>한 번만</strong>을 누릅니다.</p>
+          </div>
+          <img src="img/2.png" alt="연결 프로그램에서 Chrome을 선택하는 화면">
+        </article>
+
+        <article class="step">
+          <div class="step-copy">
+            <span class="step-number">3</span>
+            <h3>Chrome 메뉴 열기</h3>
+            <p>Chrome에서 TAG2.GG가 열리면 우측 상단의 <strong>점 3개 메뉴</strong>를 누릅니다.</p>
+          </div>
+          <img src="img/3.png" alt="Chrome 우측 상단의 점 3개 메뉴">
+        </article>
+
+        <article class="step">
+          <div class="step-copy">
+            <span class="step-number">4</span>
+            <h3>홈 화면에 추가</h3>
+            <p>메뉴에서 <strong>홈 화면에 추가</strong>를 선택합니다.</p>
+          </div>
+          <img src="img/4.png" alt="Chrome 메뉴의 홈 화면에 추가 항목">
+        </article>
+
+        <article class="step">
+          <div class="step-copy">
+            <span class="step-number">5</span>
+            <h3>설치 확인</h3>
+            <p>설치 창에 <strong>TAG2.GG - Tekken Tag 2 Stats</strong>가 표시되면 <strong>설치</strong>를 누릅니다.</p>
+          </div>
+          <img src="img/5.png" alt="TAG2.GG 앱 설치 확인 창">
+        </article>
+
+        <article class="step">
+          <div class="step-copy">
+            <span class="step-number">6</span>
+            <h3>설치 완료</h3>
+            <p>휴대폰 앱 화면에 <strong>TAG2.GG</strong> 아이콘이 생기면 설치가 완료된 것입니다. 다음부터 아이콘을 눌러 바로 접속할 수 있습니다.</p>
+          </div>
+          <img src="img/6.png" alt="휴대폰 앱 화면에 추가된 TAG2.GG 아이콘">
+        </article>
+      </div>
+    </section>
+
+    <section class="tip">
+      <h2>참고 사항</h2>
+      <ul>
+        <li>휴대폰 제조사나 Android 버전에 따라 메뉴 이름과 위치가 조금 다를 수 있습니다.</li>
+        <li>Chrome이 설치되어 있지 않다면 먼저 Google Play에서 Chrome을 설치해 주세요.</li>
+        <li>설치 후에는 브라우저가 아니라 홈 화면의 TAG2.GG 아이콘으로 접속하면 됩니다.</li>
+      </ul>
+    </section>
+
+    <footer>
+      TAG2.GG · Tekken Tag 2 Statistics · Developed by legbreaker
+    </footer>
+  </main>
+</body>
+</html>
