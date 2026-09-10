@@ -1529,18 +1529,33 @@ form.opponent-search {
 
 .download-icon {
   color: var(--blue);
-  margin-bottom: 18px;
+  display: inline-flex;
+  align-items: center;
+  flex: none;
 }
 
 .download-icon svg {
   display: block;
-  width: 44px;
-  height: 44px;
+  width: 24px;
+  height: 24px;
   fill: none;
   stroke: currentColor;
   stroke-width: 3;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.download-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  line-height: 1.4;
+}
+
+.download-panel .download-label,
+.download-panel .download-label > span:last-child {
+  color: #fff;
 }
 
 .download-panel h2 {
@@ -1710,6 +1725,11 @@ form.opponent-search {
   .nav-download-icon svg {
     width: 18px;
     height: 18px;
+  }
+
+  .download-icon svg {
+    width: 22px;
+    height: 22px;
   }
 
   .sidebar-footer {

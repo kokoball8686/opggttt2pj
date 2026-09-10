@@ -195,6 +195,8 @@ class TTT2Tracker:
         self.none_counter = 0
         self.battle_candidate_since = None
         self.offline_match_ignored = False
+        # 매치 종료 후 깨끗한 상태를 기다리기 위한 플래그
+        self.awaiting_clean_state = False
 
     def connect(self):
         pid = get_rpcs3_pid()
@@ -365,7 +367,11 @@ class TTT2Tracker:
             # A non-battle state ends the completed match and clears stale state.
             if not data:
                 self.none_counter += 1
-                if self.none_counter >= 5:  # ~1.5 seconds outside active battle
+                # 이전 매치가 끝난 뒤 깨끗한 상태를 확인하기 위해 카운터를 사용합니다.
+                if self.awaiting_clean_state:
+                    # 이미 클린 상태를 기다리는 중이면, None이 관측될 때까지 플래그를 유지합니다.
+                    pass
+                if self.none_counter >= 5:  # ~1.5초 동안 매치가 없음을 확인
                     if self.in_match or self.has_logged_match or self.offline_match_ignored:
                         print("⚠️ [LOBBY RETURNED] 메뉴/로비 복귀 감지 - 트래커 상태 완전히 초기화.")
                         self.in_match = False
@@ -378,7 +384,15 @@ class TTT2Tracker:
                         self.pending_samples = 0
                         self.battle_candidate_since = None
                         self.offline_match_ignored = False
+                        # 매치 종료 후 남아있는 데이터를 무시하기 위해 플래그 활성화
+                        self.awaiting_clean_state = True
+                        # 카운터 초기화
+                        self.none_counter = 0
+                # 데이터가 없을 경우 루프를 계속 진행합니다.
+                continue
             else:
+                # 상태가 관측되면 클린 상태 대기 종료
+                self.awaiting_clean_state = False
                 self.none_counter = 0
                 if self.offline_match_ignored:
                     time.sleep(0.3)

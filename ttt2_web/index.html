@@ -229,15 +229,16 @@
       const placeholderMessage = document.getElementById('placeholderMessage');
       if (view === 'download') {
         document.getElementById('directoryContent').innerHTML = `
-          <div class="download-icon" aria-hidden="true">
-            <svg viewBox="0 0 48 48">
-              <path d="M24 5v25"></path>
-              <path d="m14 21 10 10 10-10"></path>
-              <path d="M8 35v7h32v-7"></path>
-            </svg>
-          </div>
-          <p class="eyebrow">TAG2.GG Tracker Download</p>
-          <h2>Tracker 다운로드</h2>
+          <p class="eyebrow download-label">
+            <span class="download-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48">
+                <path d="M24 5v25"></path>
+                <path d="m14 21 10 10 10-10"></path>
+                <path d="M8 35v7h32v-7"></path>
+              </svg>
+            </span>
+            <span>TAG2.GG Tracker Download</span>
+          </p>
           <p class="download-lead">Tracker를 실행해 두면 RPCS3에서 진행한 온라인 대전이 자동으로 기록됩니다. 기록된 경기부터 TAG2.GG에서 전적과 통계를 확인할 수 있습니다.</p>
           <div class="download-notice">
             <strong>PC에서 다운로드해 주세요.</strong>
