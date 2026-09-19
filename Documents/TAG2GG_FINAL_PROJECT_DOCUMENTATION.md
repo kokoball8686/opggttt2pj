@@ -2,7 +2,7 @@
 
 > Tekken Tag Tournament 2 / RPCS3 온라인 대전 기록 수집기와 전적 통계 웹사이트의 전체 개발·검증·배포 기록
 
-- 문서 기준일: 2026-09-10
+- 문서 기준일: 2026-09-19
 - 프로젝트 위치: `C:\1`
 - 프로젝트명: TAG2.GG
 - 목적: RPCS3 사설 서버 환경에서 진행되는 Tekken Tag Tournament 2 온라인 대전을 자동으로 감지하고, 경기 결과를 Supabase에 저장한 뒤 웹에서 전적·통계를 제공하는 것
@@ -78,7 +78,6 @@ C:\1\
 |---|---|
 | `tracker.py` | RPCS3 프로세스 탐지, 메모리 읽기, 경기 상태 판정, Supabase 업로드 |
 | `gui_launcher.py` | Tkinter GUI, GitHub 최신 Release 확인, 트래커 시작 |
-| `test_log_sender.py` | `tracker_logs` 테이블로 테스트 로그를 보내기 위한 별도 테스트 클라이언트 |
 | `TTT2TrackerGUI.spec` | PyInstaller 빌드 설정 |
 | `BUILD_EXE.md` | Windows EXE 재빌드·검증·Release 배포 절차 |
 | `version_info.txt` | Windows 파일 속성에 들어가는 제품/파일 버전 정보 |
@@ -103,7 +102,7 @@ C:\1\
 | `assets/app-icon-192.png` | PWA 아이콘 |
 | `assets/app-icon-512.png` | PWA 아이콘 |
 | `assets/app-icon.svg` | 벡터 아이콘 |
-| `assets/characters/*.webp` | 숫자 캐릭터 ID별 캐릭터 초상화 58개 |
+| `assets/characters/*.webp` | 숫자 캐릭터 ID별 캐릭터 초상화 58개 (개별 크롭·리사이징 완료) |
 
 ### 3.4 `C:\1\Documents`
 
@@ -212,6 +211,7 @@ Python의 `ctypes`로 Windows `kernel32` API를 호출한다.
 - 알 수 없는 ID는 `Unknown ID (숫자)` 또는 `ID 숫자`로 표시한다.
 
 현재 캐릭터 사전은 58개 ID를 지원한다. Paul, King, Jin, Kazuya, Lili, Lars, Alisa, Ganryu 등 기본 캐릭터와 DLC/특수 캐릭터가 포함되어 있다.
+각 캐릭터 이미지는 웹 표시 품질을 맞추기 위해 개별 크롭과 리사이징 작업을 거쳐 사용한다.
 
 ---
 
@@ -331,22 +331,14 @@ https://<supabase-project>.supabase.co/rest/v1/matches
 
 중복 방지는 데이터베이스의 실제 trigger/function/index 설정에 의존하므로, 새 Supabase 프로젝트로 이전할 때는 해당 SQL을 함께 백업해야 한다.
 
-### 7.6 RLS와 운영 보안
+### 7.6 RLS와 운영 보안 (적용 완료)
 
-현재 작업 기록상 개발 편의를 위해 RLS(Row Level Security)가 꺼져 있는 상태로 이해된다. 이것은 테스트에는 편하지만 공개 배포에는 위험하다.
+`matches` 테이블에는 RLS(Row Level Security)가 활성화되어 있으며, 최소 권한 원칙에 따라 다음 두 가지 정책만 명시적으로 허용된다.
 
-- 브라우저와 EXE에 공개 키가 들어 있다.
-- 공개 키는 사용자 PC에서 추출할 수 있다.
-- RLS가 꺼져 있으면 의도하지 않은 INSERT·UPDATE·DELETE가 허용될 수 있다.
-- 사용자가 임의의 경기 기록을 넣거나 바꿀 가능성이 있다.
+- **`Allow public read` (SELECT 허용)**: `anon` 및 `authenticated` 역할에게 경기 기록 조회를 허용한다. 웹사이트가 전적·랭킹 데이터를 표시할 수 있는 근거다.
+- **`Allow public insert` (INSERT 허용)**: `anon` 및 `authenticated` 역할에게 신규 경기 결과 등록을 허용한다. 트래커 EXE가 인증 없이 경기 결과를 업로드할 수 있는 근거다.
 
-현재 데이터가 커뮤니티 통계용이고 신뢰를 우선한 선택이었다고 해도, 장기 운영에서는 최소한 다음을 검토해야 한다.
-
-1. 공개 사용자는 필요한 작업만 가능하도록 RLS 정책 설정
-2. `matches`에 불필요한 UPDATE/DELETE 제한
-3. 관리자 키는 절대 EXE나 웹에 넣지 않기
-4. 필요하면 트래커 업로드를 별도 Edge Function/API로 중계
-5. 로그 테이블에는 호스트명·사용자명 같은 식별 정보가 필요 이상 저장되지 않도록 검토
+UPDATE 및 DELETE에 대한 정책은 일체 생성하지 않았다. 따라서 브라우저나 EXE에서 공개 키(`anon key`)가 유출되더라도, 외부 사용자가 기존 전적을 수정하거나 삭제하는 행위는 PostgreSQL 엔진 레벨에서 원천 차단된다. 관리자 작업은 Supabase 콘솔 대시보드에서만 수행 가능하다.
 
 ---
 
@@ -372,7 +364,7 @@ https://<supabase-project>.supabase.co/rest/v1/matches
 
 그러나 다른 프로세스의 메모리를 읽고 인터넷으로 전송하는 행동 자체는 민감하게 보일 수 있다. 따라서 배포 시 “무엇을 읽고, 무엇을 보내며, 무엇은 읽지 않는지”를 사용자에게 설명해야 한다.
 
-또한 `test_log_sender.py`는 경기 데이터와 별개로 호스트명, Windows 버전, 사용자명 환경 변수 등을 `tracker_logs`에 보내는 테스트 코드다. 이것은 일반 경기 업로드와 범위가 다르므로, 실제 배포 EXE에 포함할지와 운영 로그에 저장할지를 반드시 구분해야 한다.
+과거에는 `test_log_sender.py`라는 별도 테스트 도구가 존재했으며, 이것이 호스트명·Windows 버전·사용자명 환경 변수 등을 `tracker_logs` 테이블에 전송했다. 하지만 경기 데이터와 성격이 다른 시스템 메타데이터를 수집하는 것은 프라이버시 원칙에 반하는 것으로 판단되어, 해당 스크립트와 `tracker_logs` 테이블 모두 완전히 삭제·폐기되었다. 현재 시스템은 오직 인게임 대전 결과만 수집한다.
 
 ---
 
@@ -747,16 +739,15 @@ python -m PyInstaller --clean --noconfirm C:\1\ttt2_tracker\TTT2TrackerGUI.spec
 - PWA 매니페스트와 서비스 워커
 - Android Chrome 설치 가이드
 
-### 테스트 로그 도구
+### 테스트 로그 도구 (폐기 완료)
 
-`test_log_sender.py`는 트래커 로그 전달을 별도로 시험하기 위해 만들어졌다. `tracker_logs` 테이블에 테스트 행을 전송하고 성공/실패를 콘솔에 출력한다. 일반 경기 업로드와 다른 도구이므로 운영 배포 전에 포함 여부를 확인해야 한다.
+과거 개발 중 연동 테스트를 위해 `test_log_sender.py`가 존재했으나, 호스트명·OS 사용자명 등 불필요한 시스템 메타데이터를 수집한다는 판단 하에 해당 스크립트와 `tracker_logs` 테이블 모두 완전히 삭제·폐기되었다.
 
 ### 현재 남아 있는 운영상 한계
 
 - 업로드 실패 시 자동 재전송 큐가 없다.
 - 인터넷이 끊긴 동안의 경기를 로컬에 저장해 나중에 재전송하지 않는다.
 - 오류는 주로 콘솔 출력에 의존한다.
-- RLS가 꺼져 있다면 공개 쓰기 권한을 악용할 수 있다.
 - 대시보드는 한 번에 최대 1,000개 행을 읽는다.
 - 메모리 오프셋은 RPCS3/게임 빌드 변경에 영향을 받을 수 있다.
 - 계급/랭크 시스템은 구현되지 않았다.
@@ -866,10 +857,10 @@ PyInstaller EXE는 Python 런타임과 바이트코드를 포함하므로 완전
 
 1. 업로드 실패 경기의 로컬 재전송 큐
 2. 오프라인 상태에서 임시 저장 후 복구 시 재전송
-3. Supabase RLS 재활성화와 최소 권한 정책
+3. ~~Supabase RLS 재활성화와 최소 권한 정책~~ → **완료**: `matches` 테이블에 SELECT/INSERT 정책 적용, UPDATE/DELETE 원천 차단
 4. 공개 REST 직접 쓰기 대신 Edge Function 업로드
 5. 서버 측 집계 또는 materialized view로 1,000행 제한 보완
-6. 관리자용 로그 대시보드
+6. (폐기) 관리자용 로그 대시보드 — 임시 로그 테이블 삭제로 더 이상 추진하지 않음
 7. EXE 코드 서명
 8. 배포 파일 SHA-256 자동 생성
 9. 자동 Release 빌드 파이프라인
@@ -903,4 +894,3 @@ PyInstaller EXE는 Python 런타임과 바이트코드를 포함하므로 완전
 아직 계급 시스템, 자동 재전송 큐, 코드 서명, 강한 Supabase 권한 정책은 남은 과제다. 하지만 핵심 목표였던 “RPCS3에서 실제 온라인 대전을 감지하고, 중앙 DB에 저장하고, 누구나 웹에서 전적을 확인하는 시스템”은 완성되었다.
 
 이 문서는 현재 구현을 보존하기 위한 최종 기준점이다. 이후 수정이 발생하면 코드만 바꾸지 말고, 트래커 payload·Supabase 정책·프론트엔드 조회/집계·빌드 버전·배포 안내를 함께 갱신해야 한다.
-

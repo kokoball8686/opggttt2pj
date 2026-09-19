@@ -30,7 +30,7 @@ document.getElementById('placeholder').classList.toggle('hidden', view === 'home
 document.getElementById('profile').classList.add('hidden');
 ```
 
-## 4. 캐릭터 표시
+## 4. 캐릭터 표시 및 에셋 구조
 
 숫자 ID를 이미지 URL과 한국어 이름으로 바꾼다.
 
@@ -46,6 +46,10 @@ const teamMarkup = (main, sub) => {
 ```
 
 동일 캐릭터 태그는 한 장만 표시해 모바일 공간을 절약한다.
+
+### 4.1 캐릭터 이미지 에셋 사양 (`assets/characters/`)
+- **규격 및 포맷**: 58개 전체 캐릭터 이미지가 `assets/characters/{id}.webp` 경로에 **200×200px 정사각형 무손실(True Lossless) WebP** 포맷으로 구축되어 있다.
+- **맞춤 크롭(Headroom 유지)**: 각 캐릭터의 머리 꼭대기(`head_top`)를 기준으로 헤어스타일/뿔/가면이 잘리지 않도록 정밀 수동/자동 크롭을 거쳤으며, 투명 배경(RGBA)의 안티앨리어싱 품질이 완벽히 보존되어 웹사이트의 칠흑 같은 다크 테마(`--bg: #090d14`) 배경에서도 흰색 구멍이나 테두리 얼룩 없이 자연스럽게 투과·렌더링된다.
 
 ## 5. XSS 방어용 문자열 처리
 

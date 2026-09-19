@@ -47,18 +47,17 @@ created_at timestamptz default now()
 - 컬럼 타입
 - REST 권한
 
-## 6. RLS
+## 6. RLS (Row Level Security 적용 완료)
 
-Row Level Security가 꺼져 있으면 공개 키를 가진 사용자가 허용된 REST 작업을 넓게 수행할 수 있다. 현재 프로젝트가 커뮤니티 통계용으로 운영되더라도 다음 단계에서는 읽기와 쓰기 권한을 분리하는 것이 좋다.
+현재 `matches` 테이블에는 RLS가 활성화되어 있으며, 최소 권한 원칙에 따라 명시적인 정책이 적용되어 있다.
 
-- 웹 공개 사용자: 필요한 읽기만
-- 트래커: 필요한 경기 INSERT만
-- 관리자: 별도 인증을 거친 관리 작업
-- UPDATE/DELETE: 일반 공개 사용자 차단
+- **웹 공개 사용자 (SELECT 허용)**: 정책 `"Allow public read"`를 통해 누구나 경기 기록을 조회할 수 있다 (`FOR SELECT TO anon, authenticated USING (true)`).
+- **트래커 프로그램 (INSERT 허용)**: 정책 `"Allow public insert"`를 통해 인증 없이도 신규 경기 결과를 등록할 수 있다 (`FOR INSERT TO anon, authenticated WITH CHECK (true)`).
+- **무단 수정 및 삭제 차단 (UPDATE / DELETE 불가)**: UPDATE 및 DELETE에 대한 정책을 일체 생성하지 않아, 외부 사용자가 공개 anon key를 이용해 기존 전적을 조작하거나 삭제하는 행위가 PostgREST/PostgreSQL 엔진 레벨에서 원천 차단된다. (관리자 작업은 Supabase 콘솔 대시보드에서만 수행 가능)
 
-## 7. 로그 테이블
+## 7. 로그 테이블 및 클라이언트 폐기 (보안 조치 완료)
 
-`test_log_sender.py`는 `tracker_logs`에 테스트 로그를 보낸다. 호스트명·Windows 사용자명·Windows 버전 같은 값은 경기 데이터와 성격이 다르므로, 실제 운영 시 수집 목적과 보관 기간을 명확히 해야 한다.
+과거 연동 테스트용으로 사용되던 `tracker_logs` 테이블과 테스트 클라이언트인 `test_log_sender.py`는 보안 및 프라이버시 검토를 거쳐 완전히 삭제·폐기되었다. 현재 시스템은 불필요한 시스템 메타데이터(호스트명, OS 사용자명 등)를 수집하지 않으며, 오직 인게임 대전 결과(`matches`)만 취급한다.
 
 ## 8. 백엔드 변경 체크리스트
 
