@@ -54,6 +54,7 @@ P1_MAIN_CHARACTER_OFFSET = 0x1B3
 P2_MAIN_CHARACTER_OFFSET = 0x1B7
 P1_SUB_CHARACTER_OFFSET = 0x1BB
 P2_SUB_CHARACTER_OFFSET = 0x1BF
+MAP_ID_OFFSET = 0x307
 CHARACTER_NAMES = {
     88: "Unknown",
     112: "Doctor",
@@ -114,6 +115,42 @@ CHARACTER_NAMES = {
     60: "Feng",
     86: "Panda",
 }
+MAP_NAMES = {
+    # Original maps
+    0: "Arena",
+    1: "Festive Parade",
+    2: "Eternal Paradise",
+    3: "Historic Town Square",
+    4: "Condor Canyon",
+    5: "Arctic Dream",
+    6: "Dusk after the Rain",
+    7: "Bountiful Sea",
+    8: "Moonlit Wilderness",
+    9: "Wayang Kulit",
+    10: "Fontana di Trevi",
+    11: "Sakura Schoolyard",
+    12: "Tempest",
+    13: "Winter Palace",
+    14: "Hall of Judgement",
+    15: "Naraku",
+    16: "Heavenly Garden",
+    17: "Fallen Garden",
+
+    # DLC maps
+    40: "Fireworks Over Barcelona",
+    41: "Coastline Sunset",
+    42: "Riverside Promenade",
+    43: "Tropical Rainforest",
+    44: "Moai Excavation",
+    45: "Extravagant Underground",
+    47: "Modern Oasis",
+    48: "Snoop Dogg",
+    46: "Tulip Festival",
+
+    # Hidden maps
+    25: "Strategic Space",
+    50: "Odeum of Illusions",
+}
 
 
 def get_rpcs3_pid():
@@ -138,6 +175,7 @@ def send_match_to_supabase(
     p2_main_character_id,
     p1_sub_character_id,
     p2_sub_character_id,
+    map_id,
     start_time,
     end_time,
 ):
@@ -158,6 +196,7 @@ def send_match_to_supabase(
         "p2_main_character_id": p2_main_character_id,
         "p1_sub_character_id": p1_sub_character_id,
         "p2_sub_character_id": p2_sub_character_id,
+        "map_id": map_id,
         "winner": winner,
         "start_time": start_time.isoformat() if start_time else datetime.now(timezone.utc).isoformat(),
         "end_time": end_time.isoformat(),
@@ -316,6 +355,10 @@ class TTT2Tracker:
             character_ids = self.read_character_ids(battle_base)
             if character_ids is None:
                 return None
+
+            map_id = self.read_byte(battle_base + MAP_ID_OFFSET)
+            if map_id is None:
+                return None
                 
             # Score sanity check: round wins cannot exceed 3
             if p1_wins > 3 or p2_wins > 3:
@@ -330,6 +373,7 @@ class TTT2Tracker:
                 "p2_main_character_id": character_ids[1],
                 "p1_sub_character_id": character_ids[2],
                 "p2_sub_character_id": character_ids[3],
+                "map_id": map_id,
                 "battle_state": battle_state,
             }
         except:
@@ -406,6 +450,7 @@ class TTT2Tracker:
                 p2_main_character_id = data["p2_main_character_id"]
                 p1_sub_character_id = data["p1_sub_character_id"]
                 p2_sub_character_id = data["p2_sub_character_id"]
+                map_id = data["map_id"]
 
                 if self.has_logged_match:
                     time.sleep(0.3)
@@ -480,6 +525,7 @@ class TTT2Tracker:
                         p2_main_character_id,
                         p1_sub_character_id,
                         p2_sub_character_id,
+                        map_id,
                         self.match_start_time,
                         end_time,
                     )

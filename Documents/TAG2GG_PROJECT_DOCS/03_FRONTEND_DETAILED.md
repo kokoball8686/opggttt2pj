@@ -12,7 +12,7 @@ React나 Next.js 서버가 아니라 단일 정적 HTML 파일 중심의 애플�
 function dashboardMatchQuery() {
   const fields = 'id,created_at,p1_name,p2_name,winner,start_time,end_time,' +
     'p1_score,p2_score,p1_main_character_id,p1_sub_character_id,' +
-    'p2_main_character_id,p2_sub_character_id';
+    'p2_main_character_id,p2_sub_character_id,map_id';
   return `${SUPABASE_URL}/rest/v1/matches?select=${fields}` +
     '&order=created_at.desc&limit=1000';
 }
@@ -121,11 +121,12 @@ const wins = playerMatches.filter(match =>
 
 ## 8. 경기 출력과 모바일
 
-`renderMatchMarkup()`은 결과, 점수, 양쪽 닉네임, 캐릭터 이미지, 캐릭터 한국어 이름, 시작·종료 시각, 경기 지속 시간을 하나의 행으로 만든다.
+`renderMatchMarkup()`은 결과, 점수, 양쪽 닉네임, 캐릭터 이미지, 캐릭터 한국어 이름,
+대전 맵 이름, 시작·종료 시각, 경기 지속 시간을 하나의 행으로 만든다. 맵 ID는
+프론트엔드 매핑으로 표시 이름으로 변환하며, 알 수 없는 ID도 원본 숫자를 유지한다.
 
 모바일에서는 CSS가 닉네임을 이미지 위에, 캐릭터 이름을 이미지 아래에 배치한다. 360px 이하에서는 열 폭과 이미지 크기를 더 축소한다.
 
 ## 9. 네트워크 실패
 
 Supabase 요청이 실패하면 프로필 요약과 목록 영역에 실패 메시지를 표시하고 콘솔에도 오류를 기록한다. 화면은 성공한 것처럼 빈 데이터로 처리하지 않는다.
-

@@ -20,8 +20,9 @@ MUTED = "#aaa4c7"
 ACCENT = "#5b8cff"
 PINK = "#ff3f73"
 VERSION = "0.1.0"
-RELEASES_URL = "https://github.com/opggttt2pj/TAG2GG-Tracker/releases/latest"
-LATEST_RELEASE_API = "https://api.github.com/repos/opggttt2pj/TAG2GG-Tracker/releases/latest"
+RELEASES_URL = "https://github.com/opggttt2pj/TAG2.GG-Tracker/releases/latest"
+DOWNLOAD_URL = "https://github.com/opggttt2pj/TAG2.GG-Tracker/releases/latest/download/TAG2GGTracker.zip"
+LATEST_RELEASE_API = "https://api.github.com/repos/opggttt2pj/TAG2.GG-Tracker/releases/latest"
 
 
 def resource_path(filename):
@@ -55,6 +56,10 @@ class TrackerWindow:
         if len(parts) != 3 or not all(part.isdigit() for part in parts):
             raise ValueError(f"Invalid version: {version}")
         return tuple(int(part) for part in parts)
+
+    @staticmethod
+    def _display_version(version):
+        return version.strip().lstrip("vV")
 
     @classmethod
     def _get_latest_version(cls):
@@ -121,10 +126,10 @@ class TrackerWindow:
         message = (
             "현재 사용 중인 TAG2.GG Tracker는 구버전이라 실행할 수 없습니다.\n"
             "최신 버전을 다운로드해 주세요.\n\n"
-            f"현재 버전: {VERSION}\n"
-            f"최신 버전: {latest_version}\n\n"
-            "다운로드 페이지:\n"
-            f"{RELEASES_URL}"
+            f"현재 버전: {self._display_version(VERSION)}\n"
+            f"최신 버전: {self._display_version(latest_version)}\n\n"
+            "최신 버전 다운로드:\n"
+            f"{DOWNLOAD_URL}"
         )
         self.root.update_idletasks()
         self.root.deiconify()
@@ -138,7 +143,7 @@ class TrackerWindow:
         )
         self.root.attributes("-topmost", False)
         if should_open:
-            webbrowser.open(RELEASES_URL)
+            webbrowser.open(DOWNLOAD_URL)
         self.root.destroy()
 
     def _build_layout(self):

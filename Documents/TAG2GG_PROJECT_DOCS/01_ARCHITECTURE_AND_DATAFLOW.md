@@ -28,12 +28,12 @@ TAG2.GG는 RPCS3에서 플레이되는 Tekken Tag Tournament 2 온라인 경기 
 RPCS3 실행
   -> tracker.py가 rpcs3.exe PID 탐색
   -> OpenProcess로 읽기 핸들 획득
-  -> 게스트 RAM 기준 주소와 상대 오프셋으로 닉네임/점수/캐릭터 읽기
+  -> 게스트 RAM 기준 주소와 상대 오프셋으로 닉네임/점수/캐릭터/맵 ID 읽기
   -> 온라인 경기 시작과 3승 종료 판정
   -> JSON POST /rest/v1/matches
   -> Supabase matches 저장 및 중복 방지
   -> 브라우저가 REST GET으로 경기 행 조회
-  -> JavaScript가 승률·픽률·TOP 10·프로필 계산
+  -> JavaScript가 맵 이름과 승률·픽률·TOP 10·프로필 계산
   -> TAG2.GG 화면 렌더링
 ```
 
@@ -51,4 +51,3 @@ RPCS3 실행
 ## 6. 보안 경계
 
 웹사이트와 EXE에는 공개용 Supabase 키가 들어갈 수 있다. 이 키를 비밀로 취급하는 구조가 아니므로, 실제 보안은 Supabase RLS와 API 권한에서 확보해야 한다. 관리자 키는 절대 클라이언트에 포함하면 안 된다.
-

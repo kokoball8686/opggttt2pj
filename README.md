@@ -8,7 +8,7 @@ RPCS3에서 진행한 온라인 대전을 자동으로 감지해 Supabase에 저
 
 - RPCS3 프로세스 자동 감지
 - 온라인 경기 자동 기록
-- 닉네임, 점수, 승자, 캐릭터 조합 저장
+- 닉네임, 점수, 승자, 캐릭터 조합, 대전 맵 정보 저장
 - 캐릭터 픽률 및 태그 조합 통계
 - TOP 10 플레이어
 - 플레이어 프로필과 최근 대전 기록
@@ -16,7 +16,7 @@ RPCS3에서 진행한 온라인 대전을 자동으로 감지해 Supabase에 저
 - 최근 30일 활동 차트
 - PC·모바일 반응형 화면
 - Android 홈 화면 설치를 지원하는 PWA
-- Windows 단일 실행 파일(EXE) 배포
+- Windows ZIP 배포 파일에서 실행하는 Tracker
 
 ## 동작 구조
 
@@ -30,7 +30,7 @@ Supabase PostgreSQL
 TAG2.GG 웹사이트
 ```
 
-- 트래커: Python, Win32 API, PyInstaller
+- 트래커: Python, Win32 API, Nuitka
 - 백엔드: Supabase PostgreSQL 및 REST API
 - 프론트엔드: HTML, CSS, JavaScript
 - 웹 호스팅: Netlify
@@ -40,9 +40,10 @@ TAG2.GG 웹사이트
 ### 사용자
 
 1. RPCS3와 Tekken Tag Tournament 2를 실행합니다.
-2. 최신 Release의 `TAG2GGTracker.exe`를 실행합니다.
-3. 온라인 대전을 진행합니다.
-4. 경기 종료 후 [TAG2.GG](https://tag2gg.netlify.app/)에서 기록을 확인합니다.
+2. 최신 Release의 `TAG2GGTracker.zip`을 다운로드하고 압축을 풉니다.
+3. 압축을 푼 폴더의 `TAG2GGTracker.exe`를 실행합니다.
+4. 온라인 대전을 진행합니다.
+5. 경기 종료 후 [TAG2.GG](https://tag2gg.netlify.app/)에서 기록을 확인합니다.
 
 오프라인 대전은 기록하지 않습니다. 트래커는 Windows용이며 RPCS3가 실행 중이어야 합니다.
 
@@ -64,7 +65,7 @@ C:\1
 ├─ ttt2_tracker
 │  ├─ tracker.py              # RPCS3 감시 및 경기 업로드
 │  ├─ gui_launcher.py         # GUI 런처와 버전 확인
-│  ├─ TTT2TrackerGUI.spec    # PyInstaller 설정
+│  ├─ TTT2TrackerGUI.spec    # 기존 PyInstaller 설정
 │  └─ BUILD_EXE.md            # EXE 빌드·Release 안내
 ├─ ttt2_web
 │  ├─ index.html              # 웹 앱과 통계 로직
@@ -83,6 +84,7 @@ C:\1
 - 플레이어 닉네임
 - 경기 점수와 승자
 - 사용 캐릭터 ID
+- 대전 맵 ID
 - 경기 시작·종료 시각
 
 파일, 브라우저 기록, 비밀번호, 화면 캡처 등은 수집하지 않습니다. 프로그램은 경기 데이터를 Supabase로 전송하므로, 배포 전 [개인정보 및 보안 상세 문서](Documents/TAG2GG_PROJECT_DOCS/07_HISTORY_SECURITY_LIMITATIONS.md)를 확인하세요.
@@ -108,4 +110,3 @@ C:\1
 ## 라이선스
 
 현재 저장소에는 별도의 오픈소스 라이선스가 지정되어 있지 않습니다. 코드와 배포 파일의 사용·수정·재배포가 필요하다면 제작자에게 먼저 문의하세요.
-

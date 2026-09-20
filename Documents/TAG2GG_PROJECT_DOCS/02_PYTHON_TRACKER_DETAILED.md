@@ -60,6 +60,7 @@ NICKNAME_LAYOUTS = {
 BATTLE_POINTER_OFFSET = 0x100D2ABC
 BATTLE_STATE_OFFSET = 0x168172F
 OFFLINE_MODE_FLAG_OFFSET = 0x193190C
+MAP_ID_OFFSET = 0x307
 P1_SCORE_OFFSET = 0xB
 P2_SCORE_OFFSET = 0xB + 0xD4
 ```
@@ -106,7 +107,7 @@ def read_bytes(self, address, length):
 
 상위 함수는 읽기 실패를 유효한 게임 상태로 취급하지 않는다. 닉네임은 null 종료 바이트를 기준으로 자르고 UTF-8로 디코드한다.
 
-## 6. 닉네임·점수·캐릭터
+## 6. 닉네임·점수·캐릭터·맵
 
 ```python
 def read_player_names(self):
@@ -125,7 +126,9 @@ guest_address = int.from_bytes(raw, "big")
 battle_base = self.ram_base + guest_address
 ```
 
-캐릭터 ID는 4바이트 little-endian으로 읽는다. P1/P2의 메인·서브 캐릭터 네 값을 데이터베이스에 함께 저장한다.
+캐릭터 ID는 4바이트 little-endian으로 읽는다. P1/P2의 메인·서브 캐릭터 네 값을
+데이터베이스에 함께 저장한다. 맵 ID는 `battle_base + 0x307`에서 1바이트로
+읽으며, `0`은 Arena를 뜻하는 유효한 값이다.
 
 ## 7. `poll_state()`가 유효 상태를 만드는 과정
 
@@ -150,7 +153,9 @@ def poll_state(self):
             return None
 ```
 
-뒤이어 캐릭터 ID를 읽고 점수가 3을 초과하지 않는지 검사한다. 어느 조건이든 실패하면 `None`이다. 이 `None`이 메인 루프에서 로비 복귀·상태 초기화 판단으로 연결된다.
+뒤이어 캐릭터 ID와 맵 ID를 읽고 점수가 3을 초과하지 않는지 검사한다. 어느
+조건이든 실패하면 `None`이다. 이 `None`이 메인 루프에서 로비 복귀·상태 초기화
+판단으로 연결된다.
 
 ## 8. 시작·종료 상태 머신
 
@@ -200,6 +205,7 @@ payload = {
     "p1_sub_character_id": p1_sub_character_id,
     "p2_sub_character_id": p2_sub_character_id,
     "winner": winner,
+    "map_id": map_id,
     "start_time": start_time.isoformat(),
     "end_time": end_time.isoformat(),
 }
@@ -243,4 +249,3 @@ while True:
 - 새 DB 컬럼을 추가하면 payload와 프론트엔드 조회 필드를 동시에 바꿔야 한다.
 - 공개 EXE에는 관리자 Supabase 키를 넣으면 안 된다.
 - Python EXE는 역분석 가능하므로 비밀 알고리즘이나 비밀키를 보호하는 수단으로 생각하면 안 된다.
-

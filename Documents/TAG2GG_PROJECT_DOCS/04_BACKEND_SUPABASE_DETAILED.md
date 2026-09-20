@@ -18,13 +18,16 @@ p1_main_character_id integer
 p1_sub_character_id integer
 p2_main_character_id integer
 p2_sub_character_id integer
+map_id smallint
 winner text
 start_time timestamptz
 end_time timestamptz
 created_at timestamptz default now()
 ```
 
-점수·닉네임·승자만 저장하던 초기 구상에서 캐릭터 ID 네 개가 확장되었다. 이 확장으로 웹에서 픽률과 태그 조합을 계산할 수 있게 되었다.
+점수·닉네임·승자만 저장하던 초기 구상에서 캐릭터 ID 네 개와 `map_id`가
+확장되었다. 캐릭터 ID는 픽률·태그 조합 계산에 사용하고, 맵 ID는 프론트엔드에서
+맵 이름으로 변환한다. 기존 경기처럼 `map_id`가 NULL인 행도 조회할 수 있다.
 
 ## 3. REST 쓰기
 
@@ -69,4 +72,3 @@ created_at timestamptz default now()
 4. JavaScript 집계·렌더링
 
 하나라도 빠지면 업로드 성공 후 화면에 값이 안 보이거나, REST 요청 자체가 실패할 수 있다.
-

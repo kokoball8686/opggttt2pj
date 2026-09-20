@@ -4,7 +4,7 @@
 
 - `gui_launcher.py`: 사용자에게 보이는 Tkinter 런처
 - `tracker.py`: 백그라운드 트래커
-- `TTT2TrackerGUI.spec`: PyInstaller 설정
+- `TTT2TrackerGUI.spec`: 기존 PyInstaller 설정
 - `version_info.txt`: Windows 파일 메타데이터
 - `BUILD_EXE.md`: 재빌드 절차
 
@@ -29,15 +29,19 @@ def _version_tuple(cls, version):
     return tuple(int(part) for part in parts)
 ```
 
-## 3. PyInstaller
+## 3. Nuitka 빌드와 ZIP 배포
 
-spec 파일은 `gui_launcher.py`를 시작점으로 삼고 아이콘·버전 파일을 포함한다. `console=False`라서 사용자에게 검은 콘솔 창이 보이지 않는다.
+현재 공식 빌드는 Python 3.12, Nuitka, Zig 컴파일러를 사용한다. `gui_launcher.py`를
+단일 실행 파일로 만든 뒤 ZIP으로 묶어 배포하며, 콘솔창은 표시하지 않는다.
 
 ```powershell
-python -m PyInstaller --clean --noconfirm C:\1\ttt2_tracker\TTT2TrackerGUI.spec
+py -3.12 -m nuitka --onefile --zig --enable-plugin=tk-inter `
+  --windows-console-mode=disable `
+  --output-filename=TAG2GGTracker.exe .\gui_launcher.py
 ```
 
-결과는 `C:\1\dist\TAG2GGTracker.exe`에서 확인한다.
+빌드한 `TAG2GGTracker.exe`를 `TAG2GGTracker.zip`으로 압축해 Release asset으로
+업로드한다. 사용자는 ZIP 압축을 푼 뒤 EXE를 실행한다.
 
 ## 4. Release 정책
 
@@ -45,11 +49,12 @@ python -m PyInstaller --clean --noconfirm C:\1\ttt2_tracker\TTT2TrackerGUI.spec
 - `/releases/latest`는 정식 공개 Release 대상
 - Draft Release는 최신 Release 조회에 포함되지 않음
 - 새 버전이 올라가면 이전 버전은 런처에서 실행 차단
-- Release asset에는 최종 EXE만 올리고 빌드 후 파일 크기·버전을 확인
+- Release asset에는 직접 만든 `TAG2GGTracker.zip`만 올리고 ZIP 안에
+  `TAG2GGTracker.exe`가 포함되었는지와 빌드 버전을 확인
 
 ## 5. 사용자 PC 요구사항
 
-사용자에게 Python이나 PyInstaller는 필요 없다. 다만 다음은 설치되어 있어야 한다.
+사용자에게 Python이나 Nuitka는 필요 없다. 다만 다음은 설치되어 있어야 한다.
 
 - Windows
 - RPCS3
@@ -80,4 +85,3 @@ python -m PyInstaller --clean --noconfirm C:\1\ttt2_tracker\TTT2TrackerGUI.spec
 ## 8. 코드 서명
 
 현재 spec에는 코드 서명이 적용되어 있지 않다. Windows 코드 서명 인증서는 EXE 제작자와 파일 무결성을 확인하는 수단이지만, 서명만으로 SmartScreen 경고가 항상 사라지는 것은 아니다. 자체 서명은 무료지만 일반 사용자 PC에서 자동 신뢰되지 않는다.
-

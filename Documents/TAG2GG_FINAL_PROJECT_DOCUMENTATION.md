@@ -2,7 +2,7 @@
 
 > Tekken Tag Tournament 2 / RPCS3 온라인 대전 기록 수집기와 전적 통계 웹사이트의 전체 개발·검증·배포 기록
 
-- 문서 기준일: 2026-09-19
+- 문서 기준일: 2026-09-20
 - 프로젝트 위치: `C:\1`
 - 프로젝트명: TAG2.GG
 - 목적: RPCS3 사설 서버 환경에서 진행되는 Tekken Tag Tournament 2 온라인 대전을 자동으로 감지하고, 경기 결과를 Supabase에 저장한 뒤 웹에서 전적·통계를 제공하는 것
@@ -32,7 +32,7 @@
 
 ## 2. 프로젝트 한 문장 요약
 
-사용자의 PC에서 실행되는 `TAG2GGTracker.exe`가 RPCS3의 경기 관련 메모리를 읽고, 온라인 경기만 골라 닉네임·점수·캐릭터 조합·시작/종료 시간을 Supabase에 업로드한다. `TAG2.GG` 웹사이트는 Supabase에서 경기 행을 조회하고, 브라우저 JavaScript로 TOP 10·프로필·픽률·태그 조합·상대 전적·최근 경기 등의 통계를 계산해 표시한다.
+사용자의 PC에서 실행되는 `TAG2GGTracker.exe`가 RPCS3의 경기 관련 메모리를 읽고, 온라인 경기만 골라 닉네임·점수·캐릭터 조합·맵 ID·시작/종료 시간을 Supabase에 업로드한다. `TAG2.GG` 웹사이트는 Supabase에서 경기 행을 조회하고, 브라우저 JavaScript로 TOP 10·프로필·픽률·태그 조합·상대 전적·최근 경기 등의 통계를 계산해 표시한다.
 
 구조를 단순화하면 다음과 같다.
 
@@ -42,7 +42,7 @@ RPCS3 + Tekken Tag Tournament 2
             │ Win32 ReadProcessMemory
             ▼
       TAG2GG Tracker
-      (Python / EXE)
+      (Python / Nuitka EXE)
             │ HTTPS REST POST
             ▼
       Supabase PostgreSQL
@@ -65,8 +65,8 @@ Supabase가 데이터 저장과 REST API를 담당하는 백엔드이고, Netlif
 
 ```text
 C:\1\
-├─ build\                         # 루트에서 생성된 PyInstaller 임시 빌드 산출물
-├─ dist\                          # 루트에서 생성된 배포 EXE
+├─ build\                         # 이전 빌드의 임시 산출물
+├─ dist\                          # ZIP 배포 파일
 ├─ Documents\                     # 백업 문서, 구현 계획, PWA 설치 가이드
 ├─ ttt2_tracker\                  # Python 트래커와 EXE 빌드 설정
 └─ ttt2_web\                      # TAG2.GG 정적 웹사이트
@@ -78,7 +78,7 @@ C:\1\
 |---|---|
 | `tracker.py` | RPCS3 프로세스 탐지, 메모리 읽기, 경기 상태 판정, Supabase 업로드 |
 | `gui_launcher.py` | Tkinter GUI, GitHub 최신 Release 확인, 트래커 시작 |
-| `TTT2TrackerGUI.spec` | PyInstaller 빌드 설정 |
+| `TTT2TrackerGUI.spec` | 이전 PyInstaller 빌드 설정 |
 | `BUILD_EXE.md` | Windows EXE 재빌드·검증·Release 배포 절차 |
 | `version_info.txt` | Windows 파일 속성에 들어가는 제품/파일 버전 정보 |
 | `app-icon.svg` | 원본 앱 아이콘 |
@@ -86,8 +86,8 @@ C:\1\
 | `app-icon-192.png` | 런처와 PWA용 192px 아이콘 |
 | `app-icon-256.png` | Windows 리소스용 256px 아이콘 |
 | `app-icon-512.png` | PWA/고해상도용 512px 아이콘 |
-| `build\` | 여러 PyInstaller 빌드의 분석·압축·패키지 임시 파일 |
-| `dist\` | `TAG2GGTracker.exe`, 테스트용 실행 파일 등 배포 결과 |
+| `build\` | 이전 PyInstaller 빌드의 분석·압축·패키지 임시 파일 |
+| `dist\` | `TAG2GGTracker.zip` 등 배포 결과 |
 | `__pycache__\` | Python 바이트코드 캐시 |
 
 ### 3.3 `C:\1\ttt2_web`
@@ -187,6 +187,7 @@ C:\1\
 | P2 메인 캐릭터 | `battle_base + 0x1B7` | 4바이트 little-endian ID | 캐릭터 조합 |
 | P1 서브 캐릭터 | `battle_base + 0x1BB` | 4바이트 little-endian ID | 캐릭터 조합 |
 | P2 서브 캐릭터 | `battle_base + 0x1BF` | 4바이트 little-endian ID | 캐릭터 조합 |
+| 맵 ID | `battle_base + 0x307` | 1바이트 | 대전 맵 ID |
 
 메모리 오프셋은 RPCS3와 게임 빌드에 종속된다. 따라서 RPCS3 또는 게임 버전이 바뀌면 “프로그램이 영원히 보장된다”고 볼 수 없고, 실제 경기로 다시 검증해야 한다.
 
@@ -236,7 +237,7 @@ Python의 `ctypes`로 Windows `kernel32` API를 호출한다.
 2. 대전 상태 플래그가 1이다.
 3. 전투 구조체 포인터가 유효하다.
 4. 두 점수를 읽을 수 있다.
-5. 네 개의 캐릭터 ID를 읽을 수 있다.
+5. 네 개의 캐릭터 ID와 맵 ID를 읽을 수 있다.
 6. 두 점수가 3보다 크지 않다.
 
 조건을 만족하지 못하면 `None`을 반환한다.
@@ -298,13 +299,14 @@ p1_main_character_id      integer
 p1_sub_character_id       integer
 p2_main_character_id      integer
 p2_sub_character_id       integer
+map_id                    smallint
 winner                     text
 start_time                 timestamptz
 end_time                   timestamptz
 created_at                 timestamptz default now()
 ```
 
-초기 계획서에는 닉네임·점수·승자·시작/종료 시간 중심으로 기록되어 있었고, 개발 중 캐릭터 ID 네 개가 추가되었다. 그래서 현재 웹사이트는 단순 승패뿐 아니라 캐릭터 픽률과 태그 조합까지 계산할 수 있다.
+초기 계획서에는 닉네임·점수·승자·시작/종료 시간 중심으로 기록되어 있었고, 개발 중 캐릭터 ID 네 개와 맵 ID가 추가되었다. 그래서 현재 웹사이트는 단순 승패뿐 아니라 캐릭터 픽률, 태그 조합, 대전 맵 정보까지 표시할 수 있다.
 
 ### 7.3 업로드 방식
 
@@ -349,6 +351,7 @@ UPDATE 및 DELETE에 대한 정책은 일체 생성하지 않았다. 따라서 �
 - 게임 닉네임 두 개
 - 승리 라운드 수 두 개
 - 네 개의 캐릭터 ID
+- 대전 맵 ID
 - 경기 시작 UTC 시각
 - 경기 종료 UTC 시각
 - 서버가 부여하는 `created_at`
@@ -409,6 +412,7 @@ UPDATE 및 DELETE에 대한 정책은 일체 생성하지 않았다. 따라서 �
 - 이번 주 급상승 플레이어
 - 최근 30일 일별 경기 수 SVG 라인 차트
 - 최근 경기 목록
+- 대전 맵 정보
 
 현재 대시보드 쿼리는 `created_at.desc`와 `limit=1000`을 사용한다. 따라서 대시보드는 한 번에 최대 1,000개의 경기 행을 브라우저로 가져와 집계한다. 이것은 Supabase 전체 데이터가 1,000개로 제한된다는 뜻이 아니라, 현재 프론트엔드 요청이 한 번에 읽는 양이 1,000개라는 뜻이다.
 
@@ -593,7 +597,7 @@ UTC 달력 기준으로 다음 두 기간을 비교한다.
 실행할 때 다음 GitHub API를 호출한다.
 
 ```text
-https://api.github.com/repos/opggttt2pj/TAG2GG-Tracker/releases/latest
+https://api.github.com/repos/opggttt2pj/TAG2.GG-Tracker/releases/latest
 ```
 
 `tag_name`을 `vMAJOR.MINOR.PATCH` 형식으로 해석해 현재 EXE의 `VERSION`과 비교한다.
@@ -606,20 +610,19 @@ https://api.github.com/repos/opggttt2pj/TAG2GG-Tracker/releases/latest
 
 이 설계는 오래된 EXE가 잘못된 오프셋이나 오래된 데이터 구조로 계속 동작하는 것을 막기 위한 것이다.
 
-### 12.3 PyInstaller 설정
+### 12.3 Nuitka 설정
 
-`TTT2TrackerGUI.spec`은 다음을 설정한다.
+현재 공식 배포 빌드는 Nuitka로 `gui_launcher.py`를 컴파일한다.
 
-- 시작 스크립트: `gui_launcher.py`
-- 포함 데이터: 192px·256px PNG, SVG 아이콘
-- 출력 이름: `TAG2GGTracker`
-- Windows 아이콘: `app-icon.ico`
-- 버전 메타데이터: `version_info.txt`
+- Python 3.12 기반
+- `--onefile` 단일 실행 파일
+- Tkinter 플러그인과 앱 아이콘·이미지 리소스 포함
 - 콘솔 창 숨김
-- `upx=True`
-- 코드 서명 설정은 비어 있음
+- Zig 컴파일러 사용
+- 빌드된 EXE를 `TAG2GGTracker.zip`으로 압축해 Release에 업로드
 
-현재 EXE는 Python 런타임과 필요한 모듈을 묶어 사용자의 PC에 Python을 설치하지 않아도 실행되도록 만든다.
+사용자는 Python이나 Nuitka를 설치할 필요가 없으며, ZIP 압축을 푼 뒤 EXE를
+실행한다. `TTT2TrackerGUI.spec`은 이전 PyInstaller 빌드 기록으로 보존한다.
 
 ### 12.4 Windows 파일 메타데이터
 
@@ -641,12 +644,16 @@ https://api.github.com/repos/opggttt2pj/TAG2GG-Tracker/releases/latest
 `BUILD_EXE.md`에 기록된 일반 절차는 다음과 같다.
 
 ```powershell
-cd C:\1\ttt2_tracker
-python --version
-python -m PyInstaller --clean --noconfirm C:\1\ttt2_tracker\TTT2TrackerGUI.spec
+Set-Location C:\1\ttt2_tracker
+py -3.12 -m nuitka --onefile --zig --enable-plugin=tk-inter `
+  --windows-console-mode=disable `
+  --output-filename=TAG2GGTracker.exe .\gui_launcher.py
+Compress-Archive .\TAG2GGTracker.exe C:\1\dist\TAG2GGTracker.zip -Force
 ```
 
-빌드 전에는 Python 문법 검사와 PyInstaller 설치 여부를 확인하고, 빌드 후 `C:\1\dist\TAG2GGTracker.exe`의 존재·버전·파일 크기를 확인한다. 최종 EXE는 GitHub Release asset으로 업로드한다.
+빌드 전에는 Python 문법 검사와 Nuitka 환경을 확인하고, 빌드 후 ZIP 안에
+`TAG2GGTracker.exe`가 포함되었는지와 버전·파일 크기를 확인한다. 최종 ZIP만
+GitHub Release asset으로 업로드한다.
 
 ### 12.6 코드 서명과 백신
 
@@ -659,7 +666,10 @@ python -m PyInstaller --clean --noconfirm C:\1\ttt2_tracker\TTT2TrackerGUI.spec
 
 완전 무료이면서 모든 사용자 PC가 자동으로 신뢰하는 코드 서명 인증서는 사실상 없다. 자체 서명 인증서는 무료지만 사용자가 별도로 신뢰 루트에 설치해야 한다. 일반 배포에서는 유료 인증서나 조건부 오픈소스 지원 서비스를 검토해야 한다.
 
-서명해도 새 프로그램의 SmartScreen 경고가 100% 사라지는 것은 아니다. 서명되지 않은 PyInstaller EXE가 다른 프로세스 메모리를 읽고 네트워크 통신을 하는 것은 백신의 휴리스틱 경고 대상이 될 수 있으므로, 배포 설명에 수집 범위와 소스/해시 검증 방법을 투명하게 적는 것이 중요하다.
+서명해도 새 프로그램의 SmartScreen 경고가 100% 사라지는 것은 아니다. 서명되지 않은
+Nuitka EXE가 다른 프로세스 메모리를 읽고 네트워크 통신을 하는 것은 백신의
+휴리스틱 경고 대상이 될 수 있으므로, 배포 설명에 수집 범위와 소스/해시 검증
+방법을 투명하게 적는 것이 중요하다.
 
 ---
 
@@ -732,7 +742,7 @@ python -m PyInstaller --clean --noconfirm C:\1\ttt2_tracker\TTT2TrackerGUI.spec
 - UTC 저장/KST 표시
 - 중복 경기 데이터베이스 처리
 - Windows GUI 런처 빌드
-- PyInstaller 단일 EXE 빌드
+- Nuitka 단일 EXE 빌드와 ZIP 배포
 - GitHub Release 최신 버전 차단
 - 데스크톱 웹 레이아웃
 - 모바일 웹 레이아웃
@@ -830,9 +840,9 @@ PyInstaller EXE는 Python 런타임과 바이트코드를 포함하므로 완전
 - `VERSION`과 `version_info.txt` 버전 일치
 - 아이콘 파일 존재
 - Python 문법 검사
-- PyInstaller 설치 확인
-- `python -m PyInstaller --clean --noconfirm C:\1\ttt2_tracker\TTT2TrackerGUI.spec`
-- 결과 EXE 이름과 크기 확인
+- Nuitka와 Zig 환경 확인
+- `py -3.12 -m nuitka --onefile ...`
+- ZIP 안의 EXE 이름과 버전 확인
 - RPCS3 미실행 상태에서 대기하는지 확인
 - RPCS3 실행 후 연결되는지 확인
 - 온라인 경기 1회로 실제 업로드 확인
@@ -886,7 +896,7 @@ PyInstaller EXE는 Python 런타임과 바이트코드를 포함하므로 완전
 - 데스크톱·모바일 반응형 레이아웃
 - Android PWA 설치
 - Windows GUI 런처
-- PyInstaller 단일 EXE 배포
+- Nuitka 단일 EXE와 `TAG2GGTracker.zip` 배포
 - GitHub Release 기반 구버전 실행 차단
 - 설치 가이드 HTML/PDF
 - 다른 PC 테스트와 단톡방 배포

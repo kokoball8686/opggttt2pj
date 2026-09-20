@@ -448,8 +448,8 @@ input {
 .profile-match,
 .match-header {
   display: grid;
-  grid-template-columns: 75px 60px 72px minmax(0, 1fr) 35px minmax(0, 1fr) 140px;
-  gap: 12px;
+  grid-template-columns: 64px 52px 64px minmax(0, 1fr) 28px minmax(0, 1fr) 150px 128px;
+  gap: 5px;
   align-items: center;
 }
 
@@ -481,22 +481,26 @@ input {
 }
 
 .match-header span:nth-child(7) {
+  text-align: left;
+}
+
+.match-header span:nth-child(8) {
   text-align: right;
 }
 
 .profile-match {
   padding: 15px 0;
   border-top: 1px solid rgba(39, 50, 70, .7);
-  font-size: 20px;
+  font-size: 17px;
 }
 
 .profile-match b {
-  font-size: 20px;
+  font-size: 17px;
 }
 
 .profile-match .versus {
   color: var(--muted);
-  font-size: 19px;
+  font-size: 16px;
   text-align: center;
 }
 
@@ -504,24 +508,35 @@ input {
   display: grid;
   gap: 3px;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 12px;
   text-align: right;
   white-space: nowrap;
 }
 
+.profile-match .match-map {
+  min-width: 0;
+  color: var(--accent);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: left;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
 .profile-match time strong {
   color: var(--text);
-  font-size: 17px;
+  font-size: 14px;
 }
 
 .match-number {
   color: var(--muted);
-  font-size: 19px;
+  font-size: 16px;
   font-weight: 700;
 }
 
 .match-score {
-  font-size: 26px;
+  font-size: 22px;
   white-space: nowrap;
   text-align: center;
 }
@@ -530,7 +545,7 @@ input {
 .match-opponent {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   min-width: 0;
 }
 
@@ -555,7 +570,7 @@ input {
 
 .match-player .team-visual,
 .match-opponent .team-visual {
-  width: 282px;
+  width: 245px;
   justify-content: flex-start;
 }
 
@@ -585,8 +600,8 @@ input {
 }
 
 .team-visual img {
-  width: 138px;
-  height: 138px;
+  width: 117px;
+  height: 117px;
   object-fit: cover;
   border-radius: 4px;
   border: 1px solid var(--line);
@@ -1610,6 +1625,14 @@ form.opponent-search {
   font-size: 14px;
 }
 
+@media (min-width: 901px) {
+  .profile-match,
+  .match-header {
+    grid-template-columns: 64px 52px 64px 380px 28px 380px 150px 128px;
+    justify-content: space-between;
+  }
+}
+
 @media (max-width: 900px) {
   .sidebar {
     width: 200px;
@@ -2062,8 +2085,8 @@ form.opponent-search {
 
   .profile-match,
   .match-header {
-    grid-template-columns: 30px 38px 38px 55px 14px 55px 70px;
-    gap: 3px;
+    grid-template-columns: 27px 34px 34px 52px 12px 52px 62px 58px;
+    gap: 1px;
   }
 
   .match-header {
@@ -2084,23 +2107,23 @@ form.opponent-search {
   .match-header span:nth-child(2),
   .match-header span:nth-child(3),
   .match-header span:nth-child(7) {
-    text-align: center;
+    text-align: left;
   }
 
   .profile-match {
-    font-size: 12px;
-  }
-
-  .profile-match b {
-    font-size: 12px;
-  }
-
-  .profile-match .versus {
     font-size: 10px;
   }
 
-  .profile-match time {
+  .profile-match b {
+    font-size: 10px;
+  }
+
+  .profile-match .versus {
     font-size: 9px;
+  }
+
+  .profile-match time {
+    font-size: 8px;
     min-width: 0;
     overflow: hidden;
     padding-right: 6px;
@@ -2109,7 +2132,16 @@ form.opponent-search {
   }
 
   .profile-match time strong {
-    font-size: 10px;
+    font-size: 9px;
+  }
+
+  .profile-match .match-map {
+    width: auto;
+    font-size: 8px;
+    line-height: 1.15;
+    overflow-wrap: break-word;
+    word-break: normal;
+    white-space: normal;
   }
 
   .profile-match .match-player .profile-link,
@@ -2137,8 +2169,8 @@ form.opponent-search {
 
   .profile-match .match-player .team-visual img,
   .profile-match .match-opponent .team-visual img {
-    width: 25px;
-    height: 25px;
+    width: 21px;
+    height: 21px;
   }
 
   .profile-match .match-player .profile-link,
@@ -2167,16 +2199,16 @@ form.opponent-search {
   }
 
   .match-number {
-    font-size: 10px;
+    font-size: 9px;
   }
 
   .match-score {
-    font-size: 13px;
+    font-size: 11px;
   }
 
   .team-visual img {
-    width: 35px;
-    height: 35px;
+    width: 30px;
+    height: 30px;
   }
 }
 
