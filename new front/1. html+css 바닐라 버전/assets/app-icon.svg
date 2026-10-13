@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#0c0a18"/>
+  <rect x="24" y="24" width="464" height="464" rx="76" fill="#17152b" stroke="#5b8cff" stroke-width="12"/>
+  <text x="256" y="270" fill="#f4f0ff" font-family="Arial, sans-serif" font-size="86" font-style="italic" font-weight="900" text-anchor="middle">TAG2.GG</text>
+  <circle cx="414" cy="408" r="27" fill="#ff3f73"/>
+</svg>
